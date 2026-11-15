@@ -16,6 +16,19 @@
       property="og:description"
       content="Paltas cremosas de Andahuaylas, directo de la chacra a tu mesa. Pide por WhatsApp."
     />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://colqa.github.io/marujita-web/" />
+    <meta
+      property="og:image"
+      content="https://colqa.github.io/marujita-web/og-image.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="es_PE" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#1f3f1c" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -27,6 +40,7 @@
         --verde: #2f5d2a;
         --verde-osc: #1f3f1c;
         --palta: #8fb339;
+        --palta-osc: #5a7d1a;
         --crema: #f6f1e3;
         --mantequilla: #efe2a8;
         --semilla: #7a4a2a;
@@ -34,7 +48,8 @@
         --gris: #5e6656;
         --blanco: #fffdf7;
         --borde: #e2dac3;
-        --wa: #1fa855;
+        --wa: #12803e;
+        --wa-hover: #0e6b33;
         --radio: 18px;
         --sombra: 0 10px 30px rgba(31, 63, 28, 0.1);
       }
@@ -45,6 +60,14 @@
       }
       html {
         scroll-behavior: smooth;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        * {
+          transition: none !important;
+        }
       }
       body {
         font-family:
@@ -125,16 +148,21 @@
           box-shadow 0.15s,
           background 0.15s;
       }
-      .btn:active {
+      .btn:active:not(:disabled) {
         transform: scale(0.98);
+      }
+      .btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        box-shadow: none;
       }
       .btn-wa {
         background: var(--wa);
         color: #fff;
-        box-shadow: 0 6px 18px rgba(31, 168, 85, 0.3);
+        box-shadow: 0 6px 18px rgba(18, 128, 62, 0.3);
       }
-      .btn-wa:hover {
-        background: #178f47;
+      .btn-wa:hover:not(:disabled) {
+        background: var(--wa-hover);
       }
       .btn-sec {
         background: transparent;
@@ -172,7 +200,7 @@
       }
       .hero h1 em {
         font-style: normal;
-        color: var(--palta);
+        color: var(--palta-osc);
       }
       .hero p.lead {
         font-size: 1.15rem;
@@ -297,6 +325,14 @@
         flex-wrap: wrap;
         margin-top: 10px;
       }
+      .prod.agotado {
+        opacity: 0.6;
+      }
+      .prod.agotado .precio {
+        font-family: Inter, sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+      }
       .tag {
         font-size: 0.78rem;
         background: rgba(239, 226, 168, 0.16);
@@ -377,9 +413,13 @@
         cursor: pointer;
         line-height: 1;
       }
-      .stepper button:hover {
+      .stepper button:hover:not(:disabled) {
         background: var(--verde);
         color: #fff;
+      }
+      .stepper button:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
       }
       .stepper output {
         min-width: 56px;
@@ -573,6 +613,9 @@
         color: var(--crema);
         margin-bottom: 10px;
       }
+      footer a {
+        color: var(--crema);
+      }
 
       .wa-float {
         position: fixed;
@@ -587,6 +630,14 @@
         align-items: center;
         justify-content: center;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        transition:
+          opacity 0.2s,
+          transform 0.2s;
+      }
+      .wa-float.oculto {
+        opacity: 0;
+        transform: scale(0.8);
+        pointer-events: none;
       }
       .wa-float svg {
         width: 32px;
@@ -631,6 +682,9 @@
         .opciones {
           grid-template-columns: 1fr;
         }
+        footer {
+          padding-bottom: 96px;
+        }
       }
     </style>
   </head>
@@ -668,20 +722,7 @@
             comer.
           </p>
           <div class="ctas">
-            <a href="#pedido" class="btn btn-wa">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="#fff"
-                aria-hidden="true"
-              >
-                <path
-                  d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.3-.8-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .5l-.3.5-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l2 .9c.3.1.5.2.5.3.1.2.1.7-.1 1.2z"
-                />
-              </svg>
-              Pedir por WhatsApp
-            </a>
+            <a href="#pedido" class="btn btn-wa">Armar mi pedido</a>
             <a href="#productos" class="btn btn-sec">Ver paltas</a>
           </div>
           <p class="nota">
@@ -765,12 +806,12 @@
         </div>
         <div class="grid4">
           <div class="card">
-            <div class="ico">🧈</div>
+            <div class="ico" aria-hidden="true">🧈</div>
             <h3>Textura mantequilla</h3>
             <p>Pulpa cremosa, sin hebras, de sabor intenso.</p>
           </div>
           <div class="card">
-            <div class="ico">⛰️</div>
+            <div class="ico" aria-hidden="true">⛰️</div>
             <h3>Origen Andahuaylas</h3>
             <p>
               De la chacra de Marujita, en Apurímac, sin pasar por varios
@@ -778,14 +819,14 @@
             </p>
           </div>
           <div class="card">
-            <div class="ico">🗓️</div>
+            <div class="ico" aria-hidden="true">🗓️</div>
             <h3>Maduración indicada</h3>
             <p>
               Cada bolsa dice si está lista hoy o en 2–3 días. Sin adivinar.
             </p>
           </div>
           <div class="card">
-            <div class="ico">🛵</div>
+            <div class="ico" aria-hidden="true">🛵</div>
             <h3>A tu puerta</h3>
             <p>Delivery en San Borja y distritos cercanos, o recojo gratis.</p>
           </div>
@@ -800,7 +841,7 @@
           <p>Precio por kilo, seleccionadas y empacadas en bolsa de papel</p>
         </div>
         <div class="grid2">
-          <article class="prod">
+          <article class="prod" id="prodFuerte">
             <svg viewBox="0 0 64 80" aria-hidden="true">
               <path
                 d="M32 4C20 4 12 20 8 34 2 56 14 76 32 76s30-20 24-42C52 20 44 4 32 4z"
@@ -828,7 +869,7 @@
               </div>
             </div>
           </article>
-          <article class="prod">
+          <article class="prod" id="prodHass">
             <svg viewBox="0 0 64 80" aria-hidden="true">
               <path
                 d="M32 4C20 4 12 20 8 34 2 56 14 76 32 76s30-20 24-42C52 20 44 4 32 4z"
@@ -846,7 +887,7 @@
                 Cáscara rugosa que se oscurece al madurar. Sabor intenso y pulpa
                 firme, perfecta para guacamole.
               </p>
-              <div class="precio" id="precioHass">S/ 12 <span>/ kg</span></div>
+              <div class="precio" id="precioHass">S/ 11 <span>/ kg</span></div>
               <div class="tags">
                 <span class="tag">Sabor intenso</span
                 ><span class="tag">Dura más</span
@@ -882,8 +923,8 @@
                   <button
                     type="button"
                     data-prod="fuerte"
-                    data-d="-0.5"
-                    aria-label="Quitar medio kilo de Fuerte"
+                    data-d="-1"
+                    aria-label="Quitar un kilo de Fuerte"
                   >
                     −
                   </button>
@@ -891,8 +932,8 @@
                   <button
                     type="button"
                     data-prod="fuerte"
-                    data-d="0.5"
-                    aria-label="Agregar medio kilo de Fuerte"
+                    data-d="1"
+                    aria-label="Agregar un kilo de Fuerte"
                   >
                     +
                   </button>
@@ -900,14 +941,14 @@
               </div>
               <div class="fila-kg">
                 <div>
-                  <b>Palta Hass</b><span id="lblHass">S/ 12 por kg</span>
+                  <b>Palta Hass</b><span id="lblHass">S/ 11 por kg</span>
                 </div>
                 <div class="stepper">
                   <button
                     type="button"
                     data-prod="hass"
-                    data-d="-0.5"
-                    aria-label="Quitar medio kilo de Hass"
+                    data-d="-1"
+                    aria-label="Quitar un kilo de Hass"
                   >
                     −
                   </button>
@@ -915,15 +956,15 @@
                   <button
                     type="button"
                     data-prod="hass"
-                    data-d="0.5"
-                    aria-label="Agregar medio kilo de Hass"
+                    data-d="1"
+                    aria-label="Agregar un kilo de Hass"
                   >
                     +
                   </button>
                 </div>
               </div>
               <small
-                >Se vende por medio kilo. Un kilo trae aprox. 3–4 paltas.</small
+                >Se vende por kilo entero. Un kilo trae aprox. 3–4 paltas.</small
               >
             </div>
 
@@ -948,6 +989,10 @@
                   /><label for="eRec">🏠 Recojo en San Borja</label>
                 </div>
               </div>
+              <small id="notaRecojo" hidden
+                >Al confirmar tu pedido te enviamos por WhatsApp la dirección
+                exacta y el horario de recojo.</small
+              >
             </div>
 
             <div class="campo" id="campoDistrito">
@@ -1002,7 +1047,7 @@
             </div>
           </form>
 
-          <aside class="resumen" aria-live="polite">
+          <aside class="resumen" aria-label="Resumen del pedido">
             <h3>Tu pedido</h3>
             <div class="linea">
               <span>Palta Fuerte</span><span id="rFuerte">S/ 0.00</span>
@@ -1013,10 +1058,12 @@
             <div class="linea">
               <span>Delivery</span><span id="rDelivery">—</span>
             </div>
-            <div class="linea total">
+            <div class="linea total" aria-live="polite" aria-atomic="true">
               <span>Total</span><span id="rTotal">S/ 0.00</span>
             </div>
-            <p class="msg" id="msg">Agrega kilos para empezar.</p>
+            <p class="msg" id="msg" aria-live="polite">
+              Agrega kilos para empezar.
+            </p>
             <button type="button" class="btn btn-wa" id="btnEnviar">
               <svg
                 width="20"
@@ -1026,7 +1073,7 @@
                 aria-hidden="true"
               >
                 <path
-                  d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"
+                  d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.3-.8-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .5l-.3.5-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l2 .9c.3.1.5.2.5.3.1.2.1.7-.1 1.2z"
                 />
               </svg>
               Enviar pedido por WhatsApp
@@ -1091,7 +1138,14 @@
             <summary>¿Cuál es el pedido mínimo?</summary>
             <p id="faqMinimo">
               Para delivery, el mínimo es 2 kg. Para recojo en San Borja puedes
-              pedir desde medio kilo.
+              pedir desde 1 kg.
+            </p>
+          </details>
+          <details>
+            <summary>¿Dónde recojo mi pedido?</summary>
+            <p>
+              El recojo es en San Borja. Al confirmar tu pedido por WhatsApp te
+              enviamos la dirección exacta y el horario.
             </p>
           </details>
           <details>
@@ -1119,6 +1173,10 @@
         Paltas de Andahuaylas, Apurímac · Entregas en San Borja y alrededores,
         Lima
       </p>
+      <p style="margin-top: 6px">
+        WhatsApp:
+        <a id="waFooter" href="#" target="_blank" rel="noopener"></a>
+      </p>
       <p style="margin-top: 6px">© <span id="anio"></span> Paltas Marujita</p>
     </footer>
 
@@ -1143,7 +1201,7 @@
    ============================================================ */
       const CONFIG = {
         whatsapp: '51987264842', // ← TU NÚMERO: 51 + 9 dígitos, sin espacios ni "+"
-        precios: { fuerte: 12, hass: 12 }, // S/ por kg
+        precios: { fuerte: 12, hass: 11 }, // S/ por kg (se vende por kilo entero)
         minimoDelivery: 2, // kg mínimos para delivery
         maxKgPorProducto: 20,
         disponible: { fuerte: true, hass: true }, // pon false si se agota uno
@@ -1180,24 +1238,28 @@
 
       const $ = (id) => document.getElementById(id);
       const soles = (n) => 'S/ ' + n.toFixed(2);
-      const fmtKg = (n) => (Number.isInteger(n) ? n : n.toFixed(1)) + ' kg';
+      const fmtKg = (n) => n + ' kg';
       const estado = { fuerte: 0, hass: 0 };
+      let avisoMax = '';
 
-      // Precios en la página
+      // Precios y disponibilidad en la página
       ['fuerte', 'hass'].forEach((p) => {
         const cap = p === 'fuerte' ? 'Fuerte' : 'Hass';
         const precio = CONFIG.precios[p];
-        $('precio' + cap).innerHTML = `S/ ${precio} <span>/ kg</span>`;
-        $('lbl' + cap).textContent = CONFIG.disponible[p]
-          ? `S/ ${precio} por kg`
-          : 'Agotada por ahora';
-        if (!CONFIG.disponible[p])
+        if (CONFIG.disponible[p]) {
+          $('precio' + cap).innerHTML = `S/ ${precio} <span>/ kg</span>`;
+          $('lbl' + cap).textContent = `S/ ${precio} por kg`;
+        } else {
+          $('prod' + cap).classList.add('agotado');
+          $('precio' + cap).textContent = 'Agotada por ahora';
+          $('lbl' + cap).textContent = 'Agotada por ahora';
           document
             .querySelectorAll(`[data-prod="${p}"]`)
             .forEach((b) => (b.disabled = true));
+        }
       });
       $('faqMinimo').textContent =
-        `Para delivery, el mínimo es ${CONFIG.minimoDelivery} kg. Para recojo en San Borja puedes pedir desde medio kilo.`;
+        `Para delivery, el mínimo es ${CONFIG.minimoDelivery} kg. Para recojo en San Borja puedes pedir desde 1 kg.`;
       $('anio').textContent = new Date().getFullYear();
 
       // Select de distritos + tarjetas de zonas
@@ -1214,11 +1276,12 @@
         sel.appendChild(og);
 
         const tarifaTxt = z.tarifa == null ? 'A coordinar' : 'S/ ' + z.tarifa;
+        const minimo = `Mínimo ${CONFIG.minimoDelivery} kg`;
         const extra = z.gratisDesde
-          ? `<b>Gratis desde ${z.gratisDesde} kg</b>`
+          ? `${minimo} · <b>Gratis desde ${z.gratisDesde} kg</b>`
           : z.tarifa == null
-            ? 'Escríbenos y vemos la mejor opción'
-            : `Mínimo ${CONFIG.minimoDelivery} kg`;
+            ? `${minimo} · Escríbenos y vemos la mejor opción`
+            : minimo;
         $('zonas').insertAdjacentHTML(
           'beforeend',
           `<div class="card zona"><h3>${z.grupo}</h3><div class="p">${tarifaTxt}</div><p>${extra}</p><p style="margin-top:6px;font-size:.85rem">${z.distritos.join(', ')}</p></div>`,
@@ -1241,6 +1304,7 @@
           coordinar = false;
 
         $('campoDistrito').style.display = entrega === 'delivery' ? '' : 'none';
+        $('notaRecojo').hidden = entrega !== 'recojo';
 
         if (entrega === 'delivery') {
           const [zi, distrito] = sel.value.split('|');
@@ -1271,6 +1335,7 @@
           }
         }
         if (kg === 0) msg = 'Agrega kilos para empezar.';
+        if (avisoMax && !err) msg = avisoMax;
 
         $('kgFuerte').textContent = fmtKg(estado.fuerte);
         $('kgHass').textContent = fmtKg(estado.hass);
@@ -1282,7 +1347,6 @@
         $('msg').textContent = msg;
         $('msg').className = 'msg' + (err ? ' err' : '');
         $('btnEnviar').disabled = !ok;
-        $('btnEnviar').style.opacity = ok ? 1 : 0.55;
 
         return { kg, sub, delivery, deliveryTxt, entrega, coordinar };
       }
@@ -1290,10 +1354,13 @@
       document.querySelectorAll('.stepper button').forEach((b) =>
         b.addEventListener('click', () => {
           const p = b.dataset.prod;
-          estado[p] = Math.min(
-            CONFIG.maxKgPorProducto,
-            Math.max(0, estado[p] + parseFloat(b.dataset.d)),
-          );
+          const d = parseInt(b.dataset.d, 10);
+          const nuevo = estado[p] + d;
+          avisoMax =
+            d > 0 && nuevo > CONFIG.maxKgPorProducto
+              ? `El máximo por web es ${CONFIG.maxKgPorProducto} kg por variedad. Para más, escríbenos por WhatsApp.`
+              : '';
+          estado[p] = Math.min(CONFIG.maxKgPorProducto, Math.max(0, nuevo));
           calcular();
         }),
       );
@@ -1332,7 +1399,7 @@
         l.push(
           c.entrega === 'delivery'
             ? `• Entrega: Delivery a ${distrito} (${c.deliveryTxt})`
-            : '• Entrega: Recojo en San Borja',
+            : '• Entrega: Recojo en San Borja (por favor envíenme la dirección)',
         );
         l.push('');
         l.push(
@@ -1345,9 +1412,25 @@
         window.open(waLink(l.join('\n')), '_blank', 'noopener');
       });
 
-      $('waFloat').href = waLink(
+      const linkInfo = waLink(
         '¡Hola Paltas Marujita! 🥑 Quisiera información sobre las paltas.',
       );
+      $('waFloat').href = linkInfo;
+      $('waFooter').href = linkInfo;
+      // 51987264842 → +51 987 264 842
+      $('waFooter').textContent = CONFIG.whatsapp.replace(
+        /^(\d{2})(\d{3})(\d{3})(\d{3})$/,
+        '+$1 $2 $3 $4',
+      );
+
+      // Oculta el botón flotante mientras se ve el formulario de pedido,
+      // para que no tape el botón "Enviar pedido".
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(
+          ([e]) => $('waFloat').classList.toggle('oculto', e.isIntersecting),
+          { threshold: 0.15 },
+        ).observe($('pedido'));
+      }
       calcular();
     </script>
   </body>
