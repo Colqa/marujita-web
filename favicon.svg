@@ -1,5 +1,62 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <path d="M32 4c-9 0-16 12-19 24-4 16 5 32 19 32s23-16 19-32C48 16 41 4 32 4z" fill="#2f5d2a"/>
-  <path d="M32 10c-7 0-12 10-14 19-3 13 4 25 14 25s17-12 14-25c-2-9-7-19-14-19z" fill="#cfe08a"/>
-  <circle cx="32" cy="38" r="10" fill="#7a4a2a"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 520" width="840" height="1040">
+  <defs>
+    <path id="bIzq" d="M134 238 C96 226 84 190 92 150 C95 136 100 124 108 114"/>
+    <path id="bDer" d="M288 250 C330 252 344 282 318 304 C304 316 290 320 284 334"/>
+    <path id="pIzq" d="M184 404 C180 432 178 452 170 480"/>
+    <path id="pDer" d="M240 404 C246 432 254 452 262 480"/>
+  </defs>
+
+  <!-- sombra -->
+  <ellipse cx="214" cy="496" rx="105" ry="10" fill="#1f3f1c" opacity=".13"/>
+
+  <!-- rayitas de energía -->
+  <g stroke="#f2b705" stroke-width="9" stroke-linecap="round">
+    <path d="M86 66 L96 92"/><path d="M116 60 L110 88"/>
+  </g>
+
+  <!-- extremidades tubo (contorno + relleno) -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g stroke="#1d2418" stroke-width="27">
+      <use href="#bIzq"/><use href="#bDer"/><use href="#pIzq"/><use href="#pDer"/>
+    </g>
+    <g stroke="#4f9a2f" stroke-width="18">
+      <use href="#bIzq"/><use href="#bDer"/><use href="#pIzq"/><use href="#pDer"/>
+    </g>
+  </g>
+
+  <!-- mano que saluda (manopla con pulgar) -->
+  <g fill="#4f9a2f" stroke="#1d2418" stroke-width="5" stroke-linejoin="round">
+    <path d="M94 116 C88 96 98 80 114 80 C130 80 138 94 134 110 C131 122 120 128 108 126 C100 125 96 122 94 116 Z"/>
+    <path d="M132 104 C142 98 152 104 148 114 C145 121 136 122 130 118"/>
+  </g>
+  <!-- pies -->
+  <g fill="#4f9a2f" stroke="#1d2418" stroke-width="5">
+    <path d="M140 482 C140 468 158 464 176 468 C186 471 188 486 180 490 L146 492 C141 491 140 487 140 482 Z"/>
+    <path d="M256 468 C274 464 292 468 292 482 C292 487 291 491 286 492 L252 490 C244 486 246 471 256 468 Z"/>
+  </g>
+  <!-- mano en la cintura (punta del tubo) -->
+  <circle cx="284" cy="336" r="12" fill="#4f9a2f" stroke="#1d2418" stroke-width="5"/>
+
+  <!-- cuerpo en forma de huevo -->
+  <path d="M212 58 C156 58 132 126 120 196 C102 298 132 410 212 410 C292 410 322 298 304 196 C292 126 268 58 212 58 Z"
+        fill="#4f9a2f" stroke="#1d2418" stroke-width="6"/>
+  <path d="M212 74 C166 74 146 134 136 200 C120 292 146 394 212 394 C278 394 304 292 288 200 C278 134 258 74 212 74 Z"
+        fill="#e8f08e"/>
+
+  <!-- pepa grande -->
+  <circle cx="212" cy="304" r="58" fill="#9a5226" stroke="#1d2418" stroke-width="5"/>
+  <path d="M182 280 Q194 262 214 258" stroke="#d0874e" stroke-width="8" fill="none" stroke-linecap="round"/>
+
+  <!-- cara propia: ojos ovalados con brillo, cejas, sonrisa abierta -->
+  <g>
+    <ellipse cx="186" cy="178" rx="11" ry="15" fill="#1d2418"/>
+    <ellipse cx="238" cy="178" rx="11" ry="15" fill="#1d2418"/>
+    <circle cx="190" cy="171" r="4" fill="#fff"/>
+    <circle cx="242" cy="171" r="4" fill="#fff"/>
+    <path d="M172 148 Q186 140 198 146" stroke="#1d2418" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M226 146 Q238 140 252 148" stroke="#1d2418" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M190 206 Q212 206 234 206 Q230 236 212 236 Q194 236 190 206 Z"
+          fill="#5a2a1e" stroke="#1d2418" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M196 208 L228 208 L226 215 L198 215 Z" fill="#fff"/>
+  </g>
 </svg>
