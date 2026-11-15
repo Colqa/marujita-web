@@ -51,6 +51,8 @@
         --borde: #e2dac3;
         --wa: #12803e;
         --wa-hover: #0e6b33;
+        --rojo: #b42318;
+        --rojo-claro: #ff9a85;
         --radio: 18px;
         --sombra: 0 10px 30px rgba(31, 63, 28, 0.1);
       }
@@ -58,6 +60,10 @@
         box-sizing: border-box;
         margin: 0;
         padding: 0;
+      }
+      /* Que ningún display de componente anule el atributo hidden */
+      [hidden] {
+        display: none !important;
       }
       html {
         scroll-behavior: smooth;
@@ -333,6 +339,55 @@
         font-size: 1.1rem;
         font-weight: 700;
       }
+      .prod-img {
+        flex: 0 0 86px;
+        width: 86px;
+        height: 108px;
+        object-fit: cover;
+        border-radius: 14px;
+      }
+      .etiqueta-lanz {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--verde-osc);
+        background: var(--palta);
+        padding: 4px 10px;
+        border-radius: 999px;
+        margin-bottom: 6px;
+      }
+      .prod .precio-reg {
+        font-size: 0.9rem;
+        color: #cfd8c0;
+        margin: 0;
+      }
+      .precio-reg s {
+        color: var(--rojo-claro);
+        font-weight: 700;
+        text-decoration-thickness: 2px;
+      }
+      .precio-fila {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px 10px;
+      }
+      .badge-desc {
+        font-size: 0.8rem;
+        font-weight: 700;
+        background: var(--mantequilla);
+        color: var(--semilla);
+        padding: 4px 10px;
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+      .prod .vigencia {
+        font-size: 0.82rem;
+        color: #cfd8c0;
+        margin: 4px 0 0;
+      }
       .tag {
         font-size: 0.78rem;
         background: rgba(239, 226, 168, 0.16);
@@ -348,6 +403,58 @@
         padding: 12px 18px;
         border-radius: 12px;
         font-weight: 600;
+      }
+
+      /* LANZAMIENTO */
+      .lanzamiento .caja {
+        max-width: 820px;
+        margin: 0 auto;
+        background: var(--blanco);
+        border: 1px solid var(--borde);
+        border-radius: var(--radio);
+        padding: 40px 36px;
+        box-shadow: var(--sombra);
+        text-align: center;
+      }
+      .lanzamiento h2 {
+        font-size: clamp(1.7rem, 4vw, 2.3rem);
+        margin-bottom: 16px;
+      }
+      .lanzamiento p {
+        color: var(--gris);
+        font-size: 1.05rem;
+        margin-bottom: 12px;
+      }
+      .cupon-box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px 10px;
+        margin: 10px 0 4px;
+        padding: 12px 18px;
+        border: 2px dashed var(--palta-osc);
+        border-radius: 14px;
+        background: #f3f7e8;
+        color: var(--verde-osc);
+        font-weight: 600;
+      }
+      .cupon-box code {
+        font:
+          800 1.05rem Inter,
+          sans-serif;
+        letter-spacing: 0.12em;
+        background: var(--verde-osc);
+        color: var(--crema);
+        padding: 4px 10px;
+        border-radius: 8px;
+      }
+      .lanzamiento .firma {
+        font-family: Fraunces, serif;
+        font-weight: 800;
+        font-size: 1.15rem;
+        color: var(--verde-osc);
+        margin: 18px 0 0;
       }
 
       /* PEDIDO */
@@ -395,6 +502,22 @@
       .fila-kg span {
         font-size: 0.85rem;
         color: var(--gris);
+      }
+      .fila-kg s {
+        color: var(--rojo);
+      }
+      #cupon {
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 700;
+      }
+      .msg-cupon.ok {
+        color: var(--verde);
+        font-weight: 600;
+      }
+      .msg-cupon.err {
+        color: var(--rojo);
+        font-weight: 600;
       }
       .stepper {
         display: flex;
@@ -496,6 +619,10 @@
         padding: 7px 0;
         border-bottom: 1px dashed rgba(255, 255, 255, 0.18);
         font-size: 0.97rem;
+      }
+      .linea.descuento span:last-child {
+        color: var(--palta);
+        font-weight: 700;
       }
       .linea.total {
         border: 0;
@@ -685,6 +812,9 @@
         footer {
           padding-bottom: 96px;
         }
+        .lanzamiento .caja {
+          padding: 28px 20px;
+        }
       }
     </style>
   </head>
@@ -805,9 +935,7 @@
                 Cáscara verde y delgada, pulpa muy cremosa. La clásica
                 "mantequilla" para pan, ensaladas y causa.
               </p>
-              <div class="precio" id="precioFuerte">
-                S/ 12 <span>/ kg</span>
-              </div>
+              <div class="precios" id="precioFuerte"></div>
               <div class="tags">
                 <span class="tag">Cremosa</span
                 ><span class="tag">Sabor suave</span
@@ -833,7 +961,7 @@
                 Cáscara rugosa que se oscurece al madurar. Sabor intenso y pulpa
                 firme, perfecta para guacamole.
               </p>
-              <div class="precio" id="precioHass">S/ 11 <span>/ kg</span></div>
+              <div class="precios" id="precioHass"></div>
               <div class="tags">
                 <span class="tag">Sabor intenso</span
                 ><span class="tag">Dura más</span
@@ -845,6 +973,35 @@
         <p class="aviso-lote" id="avisoLote">
           🥑 Lote limitado esta semana — separa tus kilos antes de que se acaben
         </p>
+      </div>
+    </section>
+
+    <section class="lanzamiento" id="lanzamiento">
+      <div class="wrap">
+        <div class="caja">
+          <span class="pill">🌱 Campaña de lanzamiento</span>
+          <h2>Queremos que primero nos conozcas</h2>
+          <p>
+            Estamos comenzando y sabemos que la confianza se gana con hechos.
+            Por eso, antes de pedirte que vuelvas a comprarnos, queremos que
+            pruebes nuestras paltas: seleccionadas, de buen tamaño, cremosas y
+            de textura mantequilla.
+          </p>
+          <p>
+            No hace falta buscar fuera del país para encontrar alimentos
+            extraordinarios: en nuestras chacras hay familias agricultoras que
+            los producen. Durante nuestro lanzamiento tenemos precios especiales
+            para que descubras su calidad, con menos intermediarios y
+            procurando que ganen tanto quien cultiva como quien disfruta.
+          </p>
+          <p>
+            Es nuestro pequeño esfuerzo por acercarte lo mejor de nuestra
+            tierra. Porque disfrutar de un buen producto nacional debería estar
+            al alcance de todos.
+          </p>
+          <div class="cupon-box" id="cuponBox" hidden></div>
+          <p class="firma">De la chacra a tu mesa. — Paltas Marujita</p>
+        </div>
       </div>
     </section>
 
@@ -863,7 +1020,7 @@
               <span class="lbl">¿Cuántos kilos?</span>
               <div class="fila-kg">
                 <div>
-                  <b>Palta Fuerte</b><span id="lblFuerte">S/ 12 por kg</span>
+                  <b>Palta Fuerte</b><span id="lblFuerte"></span>
                 </div>
                 <div class="stepper">
                   <button
@@ -887,7 +1044,7 @@
               </div>
               <div class="fila-kg">
                 <div>
-                  <b>Palta Hass</b><span id="lblHass">S/ 11 por kg</span>
+                  <b>Palta Hass</b><span id="lblHass"></span>
                 </div>
                 <div class="stepper">
                   <button
@@ -912,6 +1069,20 @@
               <small
                 >Se vende por kilo entero. Un kilo trae aprox. 3–4 paltas.</small
               >
+            </div>
+
+            <div class="campo">
+              <label for="cupon">Cupón de descuento</label>
+              <input
+                type="text"
+                id="cupon"
+                maxlength="20"
+                autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
+                aria-describedby="msgCupon"
+              />
+              <small class="msg-cupon" id="msgCupon" aria-live="polite"></small>
             </div>
 
             <div class="campo">
@@ -981,10 +1152,14 @@
           <aside class="resumen" aria-label="Resumen del pedido">
             <h3>Tu pedido</h3>
             <div class="linea">
-              <span>Palta Fuerte</span><span id="rFuerte">S/ 0.00</span>
+              <span id="rFuerteLbl">Palta Fuerte</span
+              ><span id="rFuerte">S/ 0.00</span>
             </div>
             <div class="linea">
-              <span>Palta Hass</span><span id="rHass">S/ 0.00</span>
+              <span id="rHassLbl">Palta Hass</span><span id="rHass">S/ 0.00</span>
+            </div>
+            <div class="linea descuento" id="lineaDesc" hidden>
+              <span id="rDescLbl">Descuento</span><span id="rDesc"></span>
             </div>
             <div class="linea">
               <span>Delivery</span><span id="rDelivery">—</span>
@@ -1073,6 +1248,10 @@
             </p>
           </details>
           <details>
+            <summary>¿Hasta cuándo es el precio de lanzamiento?</summary>
+            <p id="faqLanzamiento"></p>
+          </details>
+          <details>
             <summary>¿Cómo pago?</summary>
             <p>
               El pago es anticipado, por Yape o Plin. Cuando nos envíes tu
@@ -1154,73 +1333,91 @@
       </svg>
     </a>
 
+    <!-- Configuración (precios, cupones, zonas) y lógica de precios -->
+    <script src="js/config.js"></script>
+    <script src="js/precios.js"></script>
     <script>
-      /* ============================================================
-   CONFIGURACIÓN — edita solo esta parte
-   ============================================================ */
-      const CONFIG = {
-        whatsapp: '51987264842', // ← TU NÚMERO: 51 + 9 dígitos, sin espacios ni "+"
-        precios: { fuerte: 12, hass: 11 }, // S/ por kg (se vende por kilo entero)
-        minimoDelivery: 2, // kg mínimos para delivery
-        maxKgPorProducto: 20,
-        disponible: { fuerte: true, hass: true }, // pon false si se agota uno
-        zonas: [
-          // grupo: nombre mostrado | tarifa: S/ | gratisDesde: kg (null = nunca gratis)
-          {
-            grupo: 'San Borja y San Luis',
-            distritos: ['San Borja', 'San Luis'],
-            tarifa: 5,
-            gratisDesde: 3,
-          },
-          {
-            grupo: 'Distritos vecinos',
-            distritos: [
-              'Surquillo',
-              'San Isidro',
-              'Santiago de Surco',
-              'La Victoria',
-              'Miraflores',
-            ],
-            tarifa: 8,
-            gratisDesde: null,
-          },
-          {
-            grupo: 'Otros distritos',
-            distritos: ['Otro distrito'],
-            tarifa: null,
-            gratisDesde: null,
-          }, // null = a coordinar
-        ],
-      };
-      /* ============================================================ */
-
+      /* Interfaz: toda cifra sale de CONFIG + Precios (sin precios escritos aquí). */
       const $ = (id) => document.getElementById(id);
-      const soles = (n) => 'S/ ' + n.toFixed(2);
+      const P = Precios;
+      const fmt = P.formatoSoles;
       const fmtKg = (n) => n + ' kg';
-      const estado = { fuerte: 0, hass: 0 };
+      const cap = (id) => id[0].toUpperCase() + id.slice(1);
+      // Reloj del navegador del cliente (ver limitaciones en el README).
+      const ahora = () => Date.now();
+      const estado = {};
+      CONFIG.productos.forEach((p) => (estado[p.id] = 0));
       let avisoMax = '';
 
-      // Precios y disponibilidad en la página
-      ['fuerte', 'hass'].forEach((p) => {
-        const cap = p === 'fuerte' ? 'Fuerte' : 'Hass';
-        const precio = CONFIG.precios[p];
-        if (CONFIG.disponible[p]) {
-          $('precio' + cap).innerHTML = `S/ ${precio} <span>/ kg</span>`;
-          $('lbl' + cap).textContent = `S/ ${precio} por kg`;
-        } else {
-          $('prod' + cap).classList.add('agotado');
-          $('precio' + cap).textContent = 'Agotada por ahora';
-          $('lbl' + cap).textContent = 'Agotada por ahora';
+      // ---------- Catálogo y selector ----------
+      const campania = P.cuponPublicoVigente(CONFIG, ahora());
+      CONFIG.productos.forEach((p) => {
+        const C = cap(p.id);
+        const card = $('prod' + C);
+        card.querySelector('h3').textContent = p.nombre;
+        if (p.imagen) {
+          const img = document.createElement('img');
+          img.src = p.imagen;
+          img.alt = p.nombre;
+          img.className = 'prod-img';
+          card.querySelector('svg').replaceWith(img);
+        }
+        if (!p.disponible) {
+          card.classList.add('agotado');
+          $('precio' + C).innerHTML =
+            '<div class="precio">Agotada por ahora</div>';
+          $('lbl' + C).textContent = 'Agotada por ahora';
           document
-            .querySelectorAll(`[data-prod="${p}"]`)
+            .querySelectorAll(`[data-prod="${p.id}"]`)
             .forEach((b) => (b.disabled = true));
+          return;
+        }
+        const u = P.precioUnitario(p, campania);
+        if (u.final < u.regular) {
+          $('precio' + C).innerHTML =
+            `<span class="etiqueta-lanz">Precio de lanzamiento</span>` +
+            `<p class="precio-reg">Precio regular <s>${fmt(u.regular)}</s></p>` +
+            `<div class="precio-fila"><div class="precio">${fmt(u.final)} <span>/ ${p.unidad}</span></div>` +
+            `<span class="badge-desc">${P.formatoPorcentaje(u.porcentaje)} de descuento</span></div>` +
+            `<p class="vigencia">Con el cupón ${campania.codigo}, hasta el ${P.formatoFecha(campania.fin)}.</p>`;
+          $('lbl' + C).innerHTML =
+            `${fmt(u.final)} por ${p.unidad} · <s>${fmt(u.regular)}</s>`;
+        } else {
+          $('precio' + C).innerHTML =
+            `<div class="precio">${fmt(u.regular)} <span>/ ${p.unidad}</span></div>`;
+          $('lbl' + C).textContent = `${fmt(u.regular)} por ${p.unidad}`;
         }
       });
+
+      // ---------- Campaña: caja del cupón y FAQ ----------
+      const lanz = CONFIG.cupones.find(
+        (c) => c.publico && c.tipo === 'precio_lanzamiento',
+      );
+      const listaPrecios = (campo) =>
+        CONFIG.productos
+          .map((p) => `${p.nombre} ${fmt(P.aCentimos(p[campo]))}`)
+          .join(' y ');
+      if (campania) {
+        $('cupon').value = campania.codigo;
+        $('cuponBox').hidden = false;
+        $('cuponBox').innerHTML =
+          `Usa el cupón <code>${campania.codigo}</code> válido hasta el ${P.formatoFecha(campania.fin)}`;
+      }
+      if (lanz) {
+        const st = P.validarCupon(CONFIG, lanz.codigo, ahora()).estado;
+        $('faqLanzamiento').textContent =
+          st === 'vencido'
+            ? `Nuestra campaña de lanzamiento terminó el ${P.formatoFecha(lanz.fin)}. Precios actuales por kg: ${listaPrecios('precioRegular')}.`
+            : `Con el cupón ${lanz.codigo}, del ${P.formatoFecha(lanz.inicio)} al ${P.formatoFecha(lanz.fin)} (hora de Lima). Precios de lanzamiento por kg: ${listaPrecios('precioLanzamiento')}. Desde el día siguiente rige el precio regular: ${listaPrecios('precioRegular')}.`;
+      } else {
+        $('faqLanzamiento').closest('details').hidden = true;
+      }
+
       $('faqMinimo').textContent =
         `Para delivery, el mínimo es ${CONFIG.minimoDelivery} kg. Para recojo en el Supermercado Royal puedes pedir desde 1 kg.`;
       $('anio').textContent = new Date().getFullYear();
 
-      // Select de distritos + tarjetas de zonas
+      // ---------- Select de distritos + tarjetas de zonas ----------
       const sel = $('distrito');
       CONFIG.zonas.forEach((z, i) => {
         const og = document.createElement('optgroup');
@@ -1246,11 +1443,10 @@
         );
       });
 
+      // ---------- Cálculo del pedido ----------
       function calcular() {
-        const kg = estado.fuerte + estado.hass;
-        const sub =
-          estado.fuerte * CONFIG.precios.fuerte +
-          estado.hass * CONFIG.precios.hass;
+        const pedido = P.calcularPedido(CONFIG, estado, $('cupon').value, ahora());
+        const kg = pedido.kg;
         const entrega = document.querySelector(
           'input[name="entrega"]:checked',
         ).value;
@@ -1265,7 +1461,7 @@
         $('notaRecojo').hidden = entrega !== 'recojo';
 
         if (entrega === 'delivery') {
-          const [zi, distrito] = sel.value.split('|');
+          const [zi] = sel.value.split('|');
           const z = CONFIG.zonas[+zi];
           if (z.tarifa == null) {
             coordinar = true;
@@ -1273,13 +1469,12 @@
             $('notaDistrito').textContent =
               'Te confirmamos el costo por WhatsApp.';
           } else if (z.gratisDesde && kg >= z.gratisDesde) {
-            delivery = 0;
             deliveryTxt = '¡Gratis!';
             $('notaDistrito').textContent =
               `Delivery gratis desde ${z.gratisDesde} kg.`;
           } else {
-            delivery = z.tarifa;
-            deliveryTxt = soles(delivery);
+            delivery = P.aCentimos(z.tarifa);
+            deliveryTxt = fmt(delivery);
             $('notaDistrito').textContent = z.gratisDesde
               ? `Delivery S/ ${z.tarifa}. Gratis desde ${z.gratisDesde} kg.`
               : `Delivery S/ ${z.tarifa}.`;
@@ -1299,18 +1494,38 @@
           msg = 'Escribe tu nombre para enviar el pedido.';
         }
 
-        $('kgFuerte').textContent = fmtKg(estado.fuerte);
-        $('kgHass').textContent = fmtKg(estado.hass);
-        $('rFuerte').textContent = soles(estado.fuerte * CONFIG.precios.fuerte);
-        $('rHass').textContent = soles(estado.hass * CONFIG.precios.hass);
+        // Líneas del resumen
+        pedido.lineas.forEach((l) => {
+          const C = cap(l.id);
+          $('kg' + C).textContent = fmtKg(l.kg);
+          $('r' + C + 'Lbl').textContent =
+            l.kg ? `${l.nombre} (${fmtKg(l.kg)})` : l.nombre;
+          $('r' + C).textContent = fmt(l.importeRegular);
+        });
+        $('lineaDesc').hidden = pedido.descuento === 0;
+        if (pedido.descuento) {
+          $('rDescLbl').textContent = pedido.cupon.cupon.descripcion;
+          $('rDesc').textContent = fmt(-pedido.descuento);
+        }
         $('rDelivery').textContent = deliveryTxt;
         $('rTotal').textContent =
-          soles(sub + delivery) + (coordinar ? ' + envío' : '');
+          fmt(pedido.total + delivery) + (coordinar ? ' + envío' : '');
+
+        // Mensaje del cupón
+        const c = pedido.cupon;
+        let msgCupon = c.mensaje;
+        if (c.estado === 'vacio' && campania)
+          msgCupon = `Escribe ${campania.codigo} para obtener el precio de lanzamiento.`;
+        $('msgCupon').textContent = msgCupon;
+        $('msgCupon').className =
+          'msg-cupon' +
+          (c.estado === 'valido' ? ' ok' : c.estado === 'vacio' ? '' : ' err');
+
         $('msg').textContent = msg;
         $('msg').className = 'msg' + (err ? ' err' : '');
         $('btnEnviar').disabled = !ok;
 
-        return { kg, sub, delivery, deliveryTxt, entrega, coordinar };
+        return { pedido, delivery, deliveryTxt, entrega, coordinar };
       }
 
       document.querySelectorAll('.stepper button').forEach((b) =>
@@ -1331,6 +1546,7 @@
         .forEach((r) => r.addEventListener('change', calcular));
       sel.addEventListener('change', calcular);
       $('nombre').addEventListener('input', calcular);
+      $('cupon').addEventListener('input', calcular);
 
       function waLink(texto) {
         return `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(texto)}`;
@@ -1339,19 +1555,21 @@
       $('btnEnviar').addEventListener('click', () => {
         const c = calcular();
         if ($('btnEnviar').disabled) return;
+        const { pedido } = c;
         const nombre = $('nombre').value.trim();
         const nota = $('nota').value.trim();
         const distrito = sel.value.split('|')[1];
         const l = [];
         l.push(`¡Hola Paltas Marujita! 🥑 Soy ${nombre} y quiero hacer un pedido:`);
         l.push('');
-        if (estado.fuerte)
-          l.push(
-            `• Palta Fuerte: ${fmtKg(estado.fuerte)} — ${soles(estado.fuerte * CONFIG.precios.fuerte)}`,
+        pedido.lineas
+          .filter((x) => x.kg)
+          .forEach((x) =>
+            l.push(`• ${x.nombre}: ${fmtKg(x.kg)} — ${fmt(x.importeRegular)}`),
           );
-        if (estado.hass)
+        if (pedido.descuento)
           l.push(
-            `• Palta Hass: ${fmtKg(estado.hass)} — ${soles(estado.hass * CONFIG.precios.hass)}`,
+            `• ${pedido.cupon.cupon.descripcion} (cupón ${pedido.cupon.codigo}): ${fmt(-pedido.descuento)}`,
           );
         l.push(
           c.entrega === 'delivery'
@@ -1360,7 +1578,7 @@
         );
         l.push('');
         l.push(
-          `*Total: ${soles(c.sub + c.delivery)}${c.coordinar ? ' + envío a coordinar' : ''}*`,
+          `*Total: ${fmt(pedido.total + c.delivery)}${c.coordinar ? ' + envío a coordinar' : ''}*`,
         );
         l.push(
           'Pago anticipado por Yape o Plin: por favor confírmenme el pedido y los datos para pagar.',
