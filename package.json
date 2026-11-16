@@ -1,8 +1,10 @@
 {
   "name": "marujita-web",
   "private": true,
-  "description": "Landing de Paltas Marujita (sitio estático en GitHub Pages)",
+  "description": "Web de Paltas Marujita (sitio estático en GitHub Pages)",
   "scripts": {
-    "test": "node --test"
+    "dev": "node scripts/servidor.js",
+    "test": "node --test",
+    "verificar": "node scripts/verificar.js && node --test"
   }
 }

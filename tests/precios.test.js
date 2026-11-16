@@ -1,66 +1,112 @@
-// Pruebas de la lógica de precios y cupones. Ejecutar: npm test (o node --test)
+// Pruebas de precios, cupones y delivery. Ejecutar: npm test
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const CONFIG = require('../js/config.js');
-const P = require('../js/precios.js');
+const CONFIG = require('../assets/js/config.js');
+const P = require('../assets/js/precios.js');
 
 const lima = (iso) => Date.parse(iso + '-05:00');
 const CAMPANIA = lima('2026-11-20T12:00:00');
+const VENCIDO = lima('2026-12-16T00:00:00');
 const fuerte = CONFIG.productos.find((p) => p.id === 'fuerte');
 const hass = CONFIG.productos.find((p) => p.id === 'hass');
 const conCupones = (cupones) => ({ ...CONFIG, cupones });
+const SAN_BORJA = 0, VECINOS = 1, OTROS = 2;
+const resumen = (cantidades, extra = {}) =>
+  P.resumenPedido(CONFIG, {
+    cantidades,
+    codigoCupon: 'INTRO',
+    ahora: CAMPANIA,
+    modo: 'delivery',
+    zonaIndice: SAN_BORJA,
+    ...extra,
+  });
 
-test('configuración de productos', () => {
-  for (const p of CONFIG.productos) {
+test('configuración: productos completos y precios de la campaña', () => {
+  for (const p of CONFIG.productos)
     for (const k of ['id', 'nombre', 'unidad', 'precioRegular', 'precioLanzamiento', 'disponible'])
       assert.ok(k in p, `${p.id} sin ${k}`);
-    assert.equal(p.unidad, 'kg');
-  }
-  assert.equal(fuerte.precioRegular, 15.5);
+  assert.equal(fuerte.precioRegular, 16);
   assert.equal(fuerte.precioLanzamiento, 12);
-  assert.equal(hass.precioRegular, 14.3);
-  assert.equal(hass.precioLanzamiento, 11);
+  assert.equal(hass.precioRegular, 14);
+  assert.equal(hass.precioLanzamiento, 10.5);
+  assert.equal(CONFIG.tienda.whatsapp, '51993273537');
 });
 
-test('porcentajes de descuento calculados', () => {
-  assert.equal(P.porcentajeDescuento(fuerte), 22.58);
-  assert.equal(P.porcentajeDescuento(hass), 23.08);
+test('descuento calculado: 25 % en ambas variedades', () => {
+  assert.equal(P.porcentajeDescuento(fuerte), 25);
+  assert.equal(P.porcentajeDescuento(hass), 25);
+  assert.equal(P.formatoPorcentaje(25), '25%');
   assert.equal(P.formatoPorcentaje(22.58), '22.58%');
   assert.equal(P.porcentajeDescuento({ precioRegular: 10, precioLanzamiento: 12 }), 0);
 });
 
-test('formato monetario en céntimos sin errores de coma flotante', () => {
+test('dinero en céntimos sin errores de coma flotante', () => {
+  assert.equal(P.aCentimos(10.5), 1050);
   assert.equal(P.aCentimos(14.3), 1430); // 14.3*100 = 1430.0000000000002 en float
-  assert.equal(P.formatoSoles(4650), 'S/ 46.50');
+  assert.equal(P.formatoSoles(6750), 'S/ 67.50');
   assert.equal(P.formatoSoles(-1050), '−S/ 10.50');
   assert.equal(P.formatoSoles(5), 'S/ 0.05');
 });
 
-test('ejemplo del negocio: 3 kg de Fuerte con INTRO', () => {
-  const r = P.calcularPedido(CONFIG, { fuerte: 3, hass: 0 }, 'INTRO', CAMPANIA);
-  assert.equal(r.subtotalRegular, 4650);
-  assert.equal(r.descuento, 1050);
-  assert.equal(r.total, 3600);
-  assert.equal(r.cupon.estado, 'valido');
-  assert.match(r.cupon.mensaje, /Ahorras S\/ 10\.50/);
+test('ejemplo del negocio: 3 kg Fuerte + 3 kg Hass = S/ 67.50, delivery gratis', () => {
+  const r = resumen({ fuerte: 3, hass: 3 });
+  const [f, h] = r.lineas;
+  assert.deepEqual([f.kg, f.precioUnitario, f.importe], [3, 1200, 3600]);
+  assert.deepEqual([h.kg, h.precioUnitario, h.importe], [3, 1050, 3150]);
+  assert.equal(r.entrega.gratis, true);
+  assert.equal(r.entrega.centimos, 0);
+  assert.equal(r.totalFinal, 6750);
+  assert.equal(r.descuentoPedido, 0); // no hay línea de descuento en el resumen
+  assert.equal(r.ahorro, 2250); // solo para la nota del mensaje: 48 + 42 − 67.50
 });
 
-test('catálogo, carrito y total coinciden', () => {
+test('kg × precio unitario = importe, para muchas cantidades', () => {
   const cupon = P.cuponPublicoVigente(CONFIG, CAMPANIA);
   for (const p of CONFIG.productos) {
     const u = P.precioUnitario(p, cupon);
-    for (const kg of [1, 2, 7, 20]) {
-      const r = P.calcularPedido(CONFIG, { [p.id]: kg }, cupon.codigo, CAMPANIA);
+    for (let kg = 0; kg <= CONFIG.maxKgPorProducto; kg++) {
+      const r = resumen({ [p.id]: kg });
       const l = r.lineas.find((x) => x.id === p.id);
-      assert.equal(l.importe, u.final * kg, `${p.id} ${kg} kg`);
-      assert.equal(u.final, P.aCentimos(p.precioLanzamiento));
+      assert.equal(l.precioUnitario, u.final, 'catálogo = carrito');
+      assert.equal(l.importe, l.precioUnitario * l.kg);
       assert.equal(r.total, l.importe);
+      assert.equal(r.totalFinal, r.total + r.entrega.centimos);
     }
   }
-  const mixto = P.calcularPedido(CONFIG, { fuerte: 2, hass: 3 }, 'INTRO', CAMPANIA);
-  assert.equal(mixto.subtotalRegular, 2 * 1550 + 3 * 1430); // 7390
-  assert.equal(mixto.total, 2 * 1200 + 3 * 1100); // 5700
-  assert.equal(mixto.descuento, 1690);
+});
+
+test('delivery San Borja: gratis solo si el total SUPERA 3 kg', () => {
+  const casos = [
+    [{ fuerte: 2 }, false, 500, 2],
+    [{ fuerte: 3 }, false, 500, 1],
+    [{ fuerte: 3, hass: 1 }, true, 0, 0],
+    [{ fuerte: 2, hass: 2 }, true, 0, 0],
+    [{ hass: 4 }, true, 0, 0],
+  ];
+  for (const [cant, gratis, centimos, faltan] of casos) {
+    const e = resumen(cant).entrega;
+    assert.equal(e.gratis, gratis, JSON.stringify(cant));
+    assert.equal(e.centimos, centimos, JSON.stringify(cant));
+    assert.equal(e.faltanParaGratis, faltan, JSON.stringify(cant));
+  }
+  assert.equal(resumen({ fuerte: 3 }).totalFinal, 3600 + 500);
+});
+
+test('otras zonas conservan sus reglas', () => {
+  const v = resumen({ fuerte: 5 }, { zonaIndice: VECINOS }).entrega;
+  assert.deepEqual([v.gratis, v.centimos, v.coordinar], [false, 800, false]);
+  const o = resumen({ fuerte: 5 }, { zonaIndice: OTROS });
+  assert.deepEqual([o.entrega.coordinar, o.entrega.centimos], [true, 0]);
+  assert.equal(o.totalFinal, 6000);
+});
+
+test('mínimos: delivery 2 kg, recojo 1 kg; recojo siempre gratis', () => {
+  assert.equal(resumen({ fuerte: 1 }).entrega.minimoOk, false);
+  assert.equal(resumen({ fuerte: 2 }).entrega.minimoOk, true);
+  const rec = resumen({ hass: 1 }, { modo: 'recojo' });
+  assert.deepEqual([rec.entrega.minimoOk, rec.entrega.gratis, rec.entrega.centimos], [true, true, 0]);
+  assert.equal(rec.totalFinal, 1050);
+  assert.throws(() => resumen({ fuerte: 2 }, { zonaIndice: 99 }));
 });
 
 test('INTRO: vigencia en hora de Lima', () => {
@@ -69,46 +115,51 @@ test('INTRO: vigencia en hora de Lima', () => {
   assert.equal(v('2026-11-01T00:00:00'), 'valido');
   assert.equal(v('2026-12-15T23:59:59'), 'valido');
   assert.equal(v('2026-12-16T00:00:00'), 'vencido');
-  // 16/12 00:00 Lima = 16/12 05:00 UTC: a las 04:59 UTC sigue vigente
   assert.equal(P.validarCupon(CONFIG, 'INTRO', Date.parse('2026-12-16T04:59:59Z')).estado, 'valido');
   assert.equal(P.validarCupon(CONFIG, 'INTRO', Date.parse('2026-12-16T05:00:00Z')).estado, 'vencido');
 });
 
-test('después del vencimiento se cobra el precio regular', () => {
-  const despues = lima('2026-12-16T00:00:00');
-  const r = P.calcularPedido(CONFIG, { fuerte: 3 }, 'INTRO', despues);
+test('después del vencimiento se cobra el precio de referencia', () => {
+  const r = resumen({ fuerte: 3, hass: 1 }, { ahora: VENCIDO });
   assert.equal(r.cupon.estado, 'vencido');
   assert.match(r.cupon.mensaje, /promoción terminó el 15 de diciembre de 2026/);
-  assert.equal(r.descuento, 0);
-  assert.equal(r.total, 4650);
-  assert.equal(P.cuponPublicoVigente(CONFIG, despues), null);
-  assert.equal(P.precioUnitario(fuerte, null).final, 1550);
+  assert.equal(r.lineas[0].precioUnitario, 1600);
+  assert.equal(r.totalFinal, 3 * 1600 + 1400);
+  assert.equal(r.ahorro, 0);
+  assert.equal(P.cuponPublicoVigente(CONFIG, VENCIDO), null);
 });
 
-test('validación de códigos', () => {
+test('validación de códigos y mensaje sin montos de ahorro', () => {
   assert.equal(P.validarCupon(CONFIG, '  intro ', CAMPANIA).estado, 'valido');
   assert.equal(P.validarCupon(CONFIG, '', CAMPANIA).estado, 'vacio');
   assert.equal(P.validarCupon(CONFIG, 'NOEXISTE', CAMPANIA).estado, 'inexistente');
   assert.equal(P.validarCupon(CONFIG, 'INTRO INTRO', CAMPANIA).estado, 'inexistente');
   const inactivo = conCupones([{ ...CONFIG.cupones[0], activo: false }]);
   assert.equal(P.validarCupon(inactivo, 'INTRO', CAMPANIA).estado, 'inactivo');
-  assert.equal(P.calcularPedido(inactivo, { fuerte: 1 }, 'INTRO', CAMPANIA).total, 1550);
+  const m = resumen({ fuerte: 3 }).cupon.mensaje;
+  assert.match(m, /Cupón INTRO aplicado: precio de lanzamiento hasta el 15 de diciembre de 2026/);
+  assert.doesNotMatch(m, /S\//);
+  assert.match(P.validarCupon(CONFIG, 'INTRO', lima('2026-10-01T00:00:00')).mensaje, /desde el 1 de noviembre de 2026/);
+});
+
+test('sin cupón se cobra el precio de referencia', () => {
+  const r = resumen({ fuerte: 3 }, { codigoCupon: '' });
+  assert.equal(r.lineas[0].precioUnitario, 1600);
+  assert.equal(r.total, 4800);
 });
 
 test('un cupón no se aplica dos veces y el cálculo es idempotente', () => {
-  const a = P.calcularPedido(CONFIG, { fuerte: 3 }, 'INTRO', CAMPANIA);
-  const b = P.calcularPedido(CONFIG, { fuerte: 3 }, 'INTRO', CAMPANIA);
-  assert.deepEqual(a, b);
-  for (const l of a.lineas) assert.ok(l.descuento <= l.importeRegular);
+  assert.deepEqual(resumen({ fuerte: 3, hass: 2 }), resumen({ fuerte: 3, hass: 2 }));
+  for (const l of resumen({ fuerte: 3, hass: 2 }).lineas)
+    assert.ok(l.importe >= 0 && l.importe <= l.importeRegular);
 });
 
 test('cupón que no aplica a los productos del pedido', () => {
   const soloHass = conCupones([{ ...CONFIG.cupones[0], codigo: 'HASS', productos: ['hass'] }]);
   const r = P.calcularPedido(soloHass, { fuerte: 2 }, 'HASS', CAMPANIA);
   assert.equal(r.cupon.estado, 'no_aplica');
-  assert.equal(r.total, 3100);
-  const mixto = P.calcularPedido(soloHass, { fuerte: 1, hass: 1 }, 'HASS', CAMPANIA);
-  assert.equal(mixto.descuento, 330); // solo la Hass
+  assert.equal(r.total, 3200);
+  assert.equal(P.calcularPedido(soloHass, { fuerte: 1, hass: 1 }, 'HASS', CAMPANIA).total, 1600 + 1050);
 });
 
 test('arquitectura para cupones futuros: porcentaje y monto fijo', () => {
@@ -117,25 +168,20 @@ test('arquitectura para cupones futuros: porcentaje y monto fijo', () => {
     { ...base, codigo: 'AMIGA10', descripcion: 'Cliente frecuente', tipo: 'porcentaje', valor: 10 },
     { ...base, codigo: 'GRACIAS5', descripcion: 'Gracias', tipo: 'monto_fijo', valor: 5 },
   ]);
-  assert.equal(P.calcularPedido(cfg, { fuerte: 3 }, 'amiga10', CAMPANIA).total, 4185); // 46.50 − 4.65
-  assert.equal(P.calcularPedido(cfg, { hass: 1 }, 'GRACIAS5', CAMPANIA).total, 930);
-  // el monto fijo nunca deja el total negativo
+  const pct = P.calcularPedido(cfg, { fuerte: 3 }, 'amiga10', CAMPANIA);
+  assert.equal(pct.lineas[0].precioUnitario, 1440);
+  assert.equal(pct.total, 4320);
+  const fijo = P.calcularPedido(cfg, { hass: 1 }, 'GRACIAS5', CAMPANIA);
+  assert.deepEqual([fijo.descuentoPedido, fijo.total], [500, 900]);
   const grande = conCupones([{ ...base, codigo: 'X', tipo: 'monto_fijo', valor: 999 }]);
   assert.equal(P.calcularPedido(grande, { hass: 1 }, 'X', CAMPANIA).total, 0);
-  // privado: no se precarga
   assert.equal(P.cuponPublicoVigente(cfg, CAMPANIA), null);
 });
 
 test('cantidades saneadas: enteros, sin negativos, máximo y agotados', () => {
   const r = P.calcularPedido(CONFIG, { fuerte: 2.7, hass: -4 }, '', CAMPANIA);
-  assert.equal(r.lineas.find((l) => l.id === 'fuerte').kg, 2);
-  assert.equal(r.lineas.find((l) => l.id === 'hass').kg, 0);
+  assert.deepEqual(r.lineas.map((l) => l.kg), [2, 0]);
   assert.equal(P.calcularPedido(CONFIG, { fuerte: 99 }, '', CAMPANIA).kg, CONFIG.maxKgPorProducto);
   const agotada = { ...CONFIG, productos: CONFIG.productos.map((p) => (p.id === 'hass' ? { ...p, disponible: false } : p)) };
   assert.equal(P.calcularPedido(agotada, { hass: 3 }, 'INTRO', CAMPANIA).total, 0);
-});
-
-test('mensajes para el cliente', () => {
-  assert.match(P.calcularPedido(CONFIG, {}, 'INTRO', CAMPANIA).cupon.mensaje, /válido hasta el 15 de diciembre de 2026/);
-  assert.match(P.validarCupon(CONFIG, 'INTRO', lima('2026-10-01T00:00:00')).mensaje, /desde el 1 de noviembre de 2026/);
 });
