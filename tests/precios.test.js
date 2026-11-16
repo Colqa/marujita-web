@@ -1,8 +1,8 @@
 // Pruebas de la lógica de precios y cupones. Ejecutar: npm test (o node --test)
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const CONFIG = require('../js/config.js');
-const P = require('../js/precios.js');
+const CONFIG = require('../assets/js/config.js');
+const P = require('../assets/js/precios.js');
 
 const lima = (iso) => Date.parse(iso + '-05:00');
 const CAMPANIA = lima('2026-11-20T12:00:00');
