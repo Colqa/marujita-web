@@ -1,69 +1,94 @@
 # Paltas Marujita — web
 
-Landing de venta al por menor de paltas de Andahuaylas. Sitio **estático** (HTML, CSS y JavaScript, sin backend) publicado en GitHub Pages desde `main`:
+Web de venta al por menor de paltas de Andahuaylas. Sitio **estático** (HTML, CSS y JavaScript, sin backend ni build) publicado en GitHub Pages desde `main`:
 https://colqa.github.io/marujita-web/
 
 El pedido se arma en la web y se envía por **WhatsApp**; el pago es anticipado (Yape o Plin) **después** de que el negocio confirma el pedido.
 
 ## Estructura
 
-| Archivo | Qué contiene |
+```text
+marujita-web/
+├── index.html               Estructura de la página (sin precios ni datos comerciales)
+├── assets/
+│   ├── css/styles.css       Estilos
+│   └── js/
+│       ├── config.js        ★ DATOS DEL NEGOCIO: tienda, WhatsApp, productos, precios,
+│       │                      cupones, delivery y recojo. Lo único que se edita a diario.
+│       ├── precios.js       Lógica pura: precios, cupones, delivery y totales (en céntimos)
+│       ├── whatsapp.js      Lógica pura: enlaces y mensaje del pedido
+│       └── app.js           Interfaz: muestra los datos y responde a los clics
+├── scripts/
+│   ├── servidor.js          Servidor local de desarrollo (sin dependencias)
+│   └── verificar.js         Revisa la configuración y los archivos antes de publicar
+├── tests/                   Pruebas automatizadas (node --test)
+├── favicon.svg / .png, apple-touch-icon.png, og-image.png
+│                            En la raíz a propósito: ahí los buscan navegadores y WhatsApp
+└── package.json             Comandos (sin dependencias que instalar)
+```
+
+Orden de carga en `index.html`: `config.js` → `precios.js` → `whatsapp.js` → `app.js`.
+`precios.js` y `whatsapp.js` no tocan la página, por eso se prueban en Node y son la **única fuente** de los importes que ven el catálogo, el selector, el resumen y el mensaje de WhatsApp.
+
+## Cambiar datos del negocio (`assets/js/config.js`)
+
+| Qué | Dónde |
 |---|---|
-| `index.html` | Página, estilos e interfaz (no contiene precios). |
-| `js/config.js` | **Lo único que hay que editar**: WhatsApp, productos y precios, cupones, zonas de delivery. |
-| `js/precios.js` | Lógica de precios y cupones (cálculo en céntimos). Única fuente para catálogo, selector, resumen y mensaje de WhatsApp. |
-| `tests/precios.test.js` | Pruebas automatizadas de la lógica. |
+| Nombre y número de WhatsApp | `tienda.nombre`, `tienda.whatsapp` (`51` + 9 dígitos) |
+| Precios | `productos[].precioLanzamiento` (venta) y `precioRegular` (referencia tachada) |
+| Agotar un producto | `productos[].disponible: false` |
+| Foto de un producto | `productos[].imagen` (por ejemplo `assets/images/palta-fuerte.jpg`) |
+| Cupones y vigencias | `cupones[]` |
+| Mínimo, tarifas y delivery gratis | `delivery.minimoKg`, `delivery.zonas[]` (`tarifa`, `gratisMasDe`) |
+| Punto de recojo | `recojo.lugar`, `recojo.direccion`, `recojo.mapa`, `recojo.minimoKg` |
 
-## Cambiar precios
+Ejemplo: para pasar la Fuerte de S/ 12 a S/ 13 se cambia `precioLanzamiento: 13.0` y nada más. El porcentaje de descuento se recalcula solo.
 
-En `js/config.js`, dentro de `productos`:
+**Delivery gratis:** `gratisMasDe: 3` significa gratis cuando el total del pedido **supera** 3 kg (desde 4 kg). Se evalúa sobre la suma de todas las variedades.
 
-- `precioRegular`: precio comercial de referencia (propuesto por el negocio, editable). Se muestra tachado como **"Precio regular"** mientras haya un cupón de lanzamiento vigente.
-- `precioLanzamiento`: precio que aplica el cupón de tipo `precio_lanzamiento`.
-- `disponible: false` marca el producto como agotado.
-- `imagen`: ruta a una foto (por ejemplo `img/palta-fuerte.jpg`); con `null` se muestra la ilustración.
+### Cómo se presentan los precios
 
-Los porcentajes de descuento se calculan solos (Fuerte 22.58 %, Hass 23.08 %).
-
-> El precio regular es un valor comercial propuesto, no un precio de mercado verificado. Al terminar la campaña es el precio que se cobra, por eso se rotula "Precio regular" y no "antes".
+- **Catálogo y selector:** precio de venta grande; precio de referencia pequeño, tachado, rojo y en cursiva; etiqueta con el % de descuento.
+- **Resumen y mensaje de WhatsApp:** solo `kg × precio de venta = importe`, delivery y total. **Sin** líneas de descuento ni precios de referencia.
+- El ahorro solo aparece en la nota final del mensaje de WhatsApp.
 
 ## Cupones
-
-Cada cupón en `js/config.js` → `cupones` tiene: `codigo`, `descripcion`, `activo`, `publico`, `inicio`, `fin`, `tipo`, `valor` y `productos`.
 
 | `tipo` | Efecto |
 |---|---|
 | `precio_lanzamiento` | Cada producto aplicable pasa a su `precioLanzamiento`. |
-| `porcentaje` | `valor` = % de descuento sobre los productos aplicables. |
-| `monto_fijo` | `valor` = soles de descuento sobre el pedido (nunca deja el total negativo). |
+| `porcentaje` | `valor` = % de descuento por kg sobre los productos aplicables. |
+| `monto_fijo` | `valor` = soles de descuento sobre el pedido (es el único tipo que agrega una línea "Descuento" en el resumen). |
 
-- **Vigencia**: `inicio` y `fin` son fechas incluidas en hora de Lima (UTC−05:00, sin horario de verano). El cupón vence a las **00:00 del día siguiente a `fin`**.
-- `publico: true`: se precarga en el campo "Cupón de descuento" y el catálogo muestra el precio con descuento.
-- `productos: null` aplica a todos los productos.
-- Un solo cupón por pedido.
+- `inicio` y `fin` son fechas incluidas en hora de Lima (UTC−05:00, sin horario de verano). El cupón vence a las **00:00 del día siguiente a `fin`**.
+- `publico: true` lo precarga en la web. `productos: null` lo aplica a todo. Un solo cupón por pedido.
 
-**INTRO** (configurado): `precio_lanzamiento`, del 1/11/2026 al 15/12/2026. Desde el 16/12/2026 00:00 (Lima) deja de ser válido, el catálogo muestra solo el precio regular y la web cobra ese precio.
+**INTRO:** `precio_lanzamiento`, del 1/11/2026 al 15/12/2026. Desde el 16/12/2026 00:00 (Lima) deja de ser válido y la web cobra el precio de referencia (`precioRegular`). Para extender la campaña, cambia `fin`.
+
+## Desarrollo y publicación
+
+Requiere Node.js 18 o superior. No hay dependencias que instalar ni paso de build: los archivos del repositorio son exactamente lo que se publica.
+
+| Comando | Para qué |
+|---|---|
+| `npm run dev` | Servidor local en http://localhost:8080 (`PUERTO=3000 npm run dev` para otro puerto). |
+| `npm test` | Pruebas automatizadas. |
+| `npm run verificar` | Revisa la configuración (precios, WhatsApp, fechas, zonas, archivos referenciados) y corre las pruebas. **Ejecutarlo antes de cada PR.** |
+
+**Publicar:** GitHub Pages publica automáticamente la rama `main`. El flujo es:
+
+issue `PAMA-USYYNN` → rama desde `develop` → commits → `npm run verificar` → PR a `develop` → borrar la rama → PR de `develop` a `main` (**esto publica**) → cerrar el issue.
+
+Al integrar `develop` en `main` usar **"Create a merge commit"** (no "Squash") para que ambas ramas no se separen.
 
 ## ⚠ Limitaciones de seguridad
 
-La validación de cupones y el cálculo de precios se ejecutan **en el navegador del cliente**. Por lo tanto:
+Los precios y cupones se calculan **en el navegador del cliente**:
 
-1. **No es segura frente a manipulación.** Cualquiera puede editar el JavaScript, cambiar el reloj de su equipo o modificar el texto del mensaje de WhatsApp antes de enviarlo.
-2. **Todos los códigos de cupón son visibles** en `js/config.js` para quien mire el código fuente. Un cupón "exclusivo" para clientes frecuentes no es secreto mientras viva aquí.
+1. **No es seguro frente a manipulación.** Cualquiera puede editar el JavaScript, cambiar el reloj de su equipo o modificar el texto del mensaje de WhatsApp antes de enviarlo.
+2. **Todos los códigos de cupón son visibles** en `assets/js/config.js`. Un cupón "exclusivo" no es secreto mientras viva aquí.
 3. La vigencia depende del **reloj del dispositivo** del cliente.
 
-**Control real:** el pedido no se cobra en la web. Antes de enviar los datos de pago por WhatsApp, el negocio debe **revisar el mensaje** (productos, kilos, cupón y total) y recalcularlo con los precios vigentes. El mensaje incluye el desglose (importe regular, cupón aplicado y descuento) para facilitar esa revisión.
+**Control real:** antes de enviar los datos de pago, revisar el pedido recibido por WhatsApp y recalcularlo con los precios vigentes.
 
-**Si más adelante se necesitan cupones personalizados de verdad** (de un solo uso, por cliente), hará falta validarlos en un servidor (por ejemplo, una función serverless o un pequeño backend) que reciba el pedido y devuelva el total. La estructura de `cupones` y la API de `js/precios.js` (`calcularPedido`) están pensadas para moverse a ese servidor sin cambiar las reglas.
-
-## Pruebas
-
-Requiere Node.js 18 o superior (no hay dependencias).
-
-```bash
-npm test
-```
-
-## Flujo de trabajo
-
-issue `PAMA-USYYNN` → rama desde `develop` → commits → PR a `develop` → borrar la rama → PR de `develop` a `main` (despliegue) → cerrar el issue.
+**Si más adelante se necesitan cupones personalizados de verdad** (de un solo uso, por cliente), hará falta validarlos en un servidor (por ejemplo una función serverless). `precios.js` no depende de la página, así que puede ejecutarse allí sin cambiar las reglas.
