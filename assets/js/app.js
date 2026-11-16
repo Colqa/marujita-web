@@ -1,4 +1,8 @@
-/* Interfaz: toda cifra sale de CONFIG + Precios (sin precios escritos aquí). */
+/* ================================================================
+   INTERFAZ — Paltas Marujita
+   Solo DOM y eventos. Ninguna cifra ni dato comercial se escribe aquí:
+   todo sale de CONFIG (config.js), Precios (precios.js) y WhatsApp (whatsapp.js).
+   ================================================================ */
 const $ = (id) => document.getElementById(id);
 const P = Precios;
 const fmt = P.formatoSoles;
@@ -6,12 +10,36 @@ const fmtKg = (n) => n + ' kg';
 const cap = (id) => id[0].toUpperCase() + id.slice(1);
 // Reloj del navegador del cliente (ver limitaciones en el README).
 const ahora = () => Date.now();
+const { tienda, delivery, recojo } = CONFIG;
+
 const estado = {};
 CONFIG.productos.forEach((p) => (estado[p.id] = 0));
 let avisoMax = '';
 
+// ---------- Textos comerciales desde la configuración ----------
+const zonaConGratis = delivery.zonas.find((z) => z.gratisMasDe != null);
+const textosCfg = {
+  zonaGratis: zonaConGratis ? zonaConGratis.distritos.join(' y ') : '',
+  reglaGratis: zonaConGratis ? P.textoGratis(zonaConGratis) : '',
+  recojoLugar: recojo.lugar,
+};
+document.querySelectorAll('[data-cfg]').forEach((el) => {
+  if (el.dataset.cfg === 'recojoMapa') {
+    el.href = recojo.mapa;
+    el.textContent = `${recojo.lugar} (${recojo.direccion})`;
+  } else {
+    el.textContent = textosCfg[el.dataset.cfg] || '';
+  }
+});
+$('faqMinimo').textContent =
+  `Para delivery, el mínimo es ${delivery.minimoKg} kg. Para recojo en ${recojo.lugar} puedes pedir desde ${recojo.minimoKg} kg.`;
+$('anio').textContent = new Date().getFullYear();
+
 // ---------- Catálogo y selector ----------
 const campania = P.cuponPublicoVigente(CONFIG, ahora());
+const tachado = (centimos) =>
+  `<s class="ref"><span class="sr-only">Precio de referencia </span>${fmt(centimos)}</s>`;
+
 CONFIG.productos.forEach((p) => {
   const C = cap(p.id);
   const card = $('prod' + C);
@@ -25,8 +53,7 @@ CONFIG.productos.forEach((p) => {
   }
   if (!p.disponible) {
     card.classList.add('agotado');
-    $('precio' + C).innerHTML =
-      '<div class="precio">Agotada por ahora</div>';
+    $('precio' + C).innerHTML = '<div class="precio">Agotada por ahora</div>';
     $('lbl' + C).textContent = 'Agotada por ahora';
     document
       .querySelectorAll(`[data-prod="${p.id}"]`)
@@ -34,19 +61,19 @@ CONFIG.productos.forEach((p) => {
     return;
   }
   const u = P.precioUnitario(p, campania);
+  const precioVenta = `<div class="precio">${fmt(u.final)} <span>/ ${p.unidad}</span></div>`;
   if (u.final < u.regular) {
     $('precio' + C).innerHTML =
-      `<span class="etiqueta-lanz">Precio de lanzamiento</span>` +
-      `<p class="precio-reg">Precio regular <s>${fmt(u.regular)}</s></p>` +
-      `<div class="precio-fila"><div class="precio">${fmt(u.final)} <span>/ ${p.unidad}</span></div>` +
-      `<span class="badge-desc">${P.formatoPorcentaje(u.porcentaje)} de descuento</span></div>` +
-      `<p class="vigencia">Con el cupón ${campania.codigo}, hasta el ${P.formatoFecha(campania.fin)}.</p>`;
+      `<p class="precio-reg">${tachado(u.regular)}</p>` +
+      `<div class="precio-fila">${precioVenta}` +
+      `<span class="badge-desc">−${P.formatoPorcentaje(u.porcentaje)}</span></div>` +
+      `<p class="vigencia">Precio de lanzamiento hasta el ${P.formatoFecha(campania.fin)}.</p>`;
     $('lbl' + C).innerHTML =
-      `${fmt(u.final)} por ${p.unidad} · <s>${fmt(u.regular)}</s>`;
+      `<strong class="precio-sel">${fmt(u.final)}</strong> por ${p.unidad} ${tachado(u.regular)}`;
   } else {
-    $('precio' + C).innerHTML =
-      `<div class="precio">${fmt(u.regular)} <span>/ ${p.unidad}</span></div>`;
-    $('lbl' + C).textContent = `${fmt(u.regular)} por ${p.unidad}`;
+    $('precio' + C).innerHTML = `<div class="precio-fila">${precioVenta}</div>`;
+    $('lbl' + C).innerHTML =
+      `<strong class="precio-sel">${fmt(u.final)}</strong> por ${p.unidad}`;
   }
 });
 
@@ -69,18 +96,14 @@ if (lanz) {
   $('faqLanzamiento').textContent =
     st === 'vencido'
       ? `Nuestra campaña de lanzamiento terminó el ${P.formatoFecha(lanz.fin)}. Precios actuales por kg: ${listaPrecios('precioRegular')}.`
-      : `Con el cupón ${lanz.codigo}, del ${P.formatoFecha(lanz.inicio)} al ${P.formatoFecha(lanz.fin)} (hora de Lima). Precios de lanzamiento por kg: ${listaPrecios('precioLanzamiento')}. Desde el día siguiente rige el precio regular: ${listaPrecios('precioRegular')}.`;
+      : `Del ${P.formatoFecha(lanz.inicio)} al ${P.formatoFecha(lanz.fin)} (hora de Lima), con el cupón ${lanz.codigo}. Precios por kg: ${listaPrecios('precioLanzamiento')}. Desde el día siguiente rige el precio regular: ${listaPrecios('precioRegular')}.`;
 } else {
   $('faqLanzamiento').closest('details').hidden = true;
 }
 
-$('faqMinimo').textContent =
-  `Para delivery, el mínimo es ${CONFIG.minimoDelivery} kg. Para recojo en el Supermercado Royal puedes pedir desde 1 kg.`;
-$('anio').textContent = new Date().getFullYear();
-
 // ---------- Select de distritos + tarjetas de zonas ----------
 const sel = $('distrito');
-CONFIG.zonas.forEach((z, i) => {
+delivery.zonas.forEach((z, i) => {
   const og = document.createElement('optgroup');
   og.label = z.grupo;
   z.distritos.forEach((d) => {
@@ -91,13 +114,14 @@ CONFIG.zonas.forEach((z, i) => {
   });
   sel.appendChild(og);
 
-  const tarifaTxt = z.tarifa == null ? 'A coordinar' : 'S/ ' + z.tarifa;
-  const minimo = `Mínimo ${CONFIG.minimoDelivery} kg`;
-  const extra = z.gratisDesde
-    ? `${minimo} · <b>Gratis desde ${z.gratisDesde} kg</b>`
-    : z.tarifa == null
-      ? `${minimo} · Escríbenos y vemos la mejor opción`
-      : minimo;
+  const tarifaTxt = z.tarifa == null ? 'A coordinar' : fmt(P.aCentimos(z.tarifa));
+  const minimo = `Mínimo ${delivery.minimoKg} kg`;
+  const extra =
+    z.gratisMasDe != null
+      ? `${minimo} · <b>Gratis ${P.textoGratis(z)}</b>`
+      : z.tarifa == null
+        ? `${minimo} · Escríbenos y vemos la mejor opción`
+        : minimo;
   $('zonas').insertAdjacentHTML(
     'beforeend',
     `<div class="card zona"><h3>${z.grupo}</h3><div class="p">${tarifaTxt}</div><p>${extra}</p><p style="margin-top:6px;font-size:.85rem">${z.distritos.join(', ')}</p></div>`,
@@ -105,75 +129,73 @@ CONFIG.zonas.forEach((z, i) => {
 });
 
 // ---------- Cálculo del pedido ----------
+const modoEntrega = () =>
+  document.querySelector('input[name="entrega"]:checked').value;
+
 function calcular() {
-  const pedido = P.calcularPedido(CONFIG, estado, $('cupon').value, ahora());
-  const kg = pedido.kg;
-  const entrega = document.querySelector(
-    'input[name="entrega"]:checked',
-  ).value;
-  let delivery = 0,
-    deliveryTxt = 'Gratis (recojo)',
-    ok = kg > 0,
+  const modo = modoEntrega();
+  const [zi, distrito] = sel.value.split('|');
+  const r = P.resumenPedido(CONFIG, {
+    cantidades: estado,
+    codigoCupon: $('cupon').value,
+    ahora: ahora(),
+    modo,
+    zonaIndice: +zi,
+  });
+  const e = r.entrega;
+  let ok = r.kg > 0,
     msg = '',
-    err = false,
-    coordinar = false;
+    err = false;
 
-  $('campoDistrito').style.display = entrega === 'delivery' ? '' : 'none';
-  $('notaRecojo').hidden = entrega !== 'recojo';
+  $('campoDistrito').style.display = modo === 'delivery' ? '' : 'none';
+  $('notaRecojo').hidden = modo !== 'recojo';
 
-  if (entrega === 'delivery') {
-    const [zi] = sel.value.split('|');
-    const z = CONFIG.zonas[+zi];
-    if (z.tarifa == null) {
-      coordinar = true;
-      deliveryTxt = 'A coordinar';
-      $('notaDistrito').textContent =
-        'Te confirmamos el costo por WhatsApp.';
-    } else if (z.gratisDesde && kg >= z.gratisDesde) {
-      deliveryTxt = '¡Gratis!';
-      $('notaDistrito').textContent =
-        `Delivery gratis desde ${z.gratisDesde} kg.`;
-    } else {
-      delivery = P.aCentimos(z.tarifa);
-      deliveryTxt = fmt(delivery);
-      $('notaDistrito').textContent = z.gratisDesde
-        ? `Delivery S/ ${z.tarifa}. Gratis desde ${z.gratisDesde} kg.`
-        : `Delivery S/ ${z.tarifa}.`;
-      if (z.gratisDesde && kg > 0 && kg < z.gratisDesde)
-        msg = `Agrega ${fmtKg(z.gratisDesde - kg)} más y el delivery es gratis 🎉`;
-    }
-    if (kg > 0 && kg < CONFIG.minimoDelivery) {
-      ok = false;
-      err = true;
-      msg = `El mínimo para delivery es ${CONFIG.minimoDelivery} kg (te faltan ${fmtKg(CONFIG.minimoDelivery - kg)}).`;
-    }
+  if (modo === 'delivery') {
+    const z = e.zona;
+    $('notaDistrito').textContent = e.coordinar
+      ? 'Te confirmamos el costo por WhatsApp.'
+      : e.gratis
+        ? `Delivery gratis ${P.textoGratis(z)}.`
+        : `Delivery ${fmt(e.centimos)}.` +
+          (z.gratisMasDe != null ? ` Gratis ${P.textoGratis(z)}.` : '');
+    if (e.faltanParaGratis > 0 && r.kg > 0)
+      msg = `Agrega ${fmtKg(e.faltanParaGratis)} más y el delivery es gratis 🎉`;
   }
-  if (kg === 0) msg = 'Agrega kilos para empezar.';
+  if (r.kg > 0 && !e.minimoOk) {
+    ok = false;
+    err = true;
+    msg = `El mínimo para ${modo === 'recojo' ? 'recojo' : 'delivery'} es ${fmtKg(e.minimoKg)} (te faltan ${fmtKg(e.minimoKg - r.kg)}).`;
+  }
+  if (r.kg === 0) msg = 'Agrega kilos para empezar.';
   if (avisoMax && !err) msg = avisoMax;
   if (ok && !$('nombre').value.trim()) {
     ok = false;
     msg = 'Escribe tu nombre para enviar el pedido.';
   }
 
-  // Líneas del resumen
-  pedido.lineas.forEach((l) => {
+  // Resumen: solo kg × precio de venta = importe. Sin líneas de descuento.
+  r.lineas.forEach((l) => {
     const C = cap(l.id);
     $('kg' + C).textContent = fmtKg(l.kg);
-    $('r' + C + 'Lbl').textContent =
-      l.kg ? `${l.nombre} (${fmtKg(l.kg)})` : l.nombre;
-    $('r' + C).textContent = fmt(l.importeRegular);
+    $('r' + C + 'Lbl').textContent = l.kg
+      ? `${l.nombre} (${fmtKg(l.kg)} × ${fmt(l.precioUnitario)})`
+      : l.nombre;
+    $('r' + C).textContent = fmt(l.importe);
   });
-  $('lineaDesc').hidden = pedido.descuento === 0;
-  if (pedido.descuento) {
-    $('rDescLbl').textContent = pedido.cupon.cupon.descripcion;
-    $('rDesc').textContent = fmt(-pedido.descuento);
+  $('lineaDesc').hidden = r.descuentoPedido === 0;
+  if (r.descuentoPedido) {
+    $('rDescLbl').textContent = r.cupon.cupon.descripcion;
+    $('rDesc').textContent = fmt(-r.descuentoPedido);
   }
-  $('rDelivery').textContent = deliveryTxt;
-  $('rTotal').textContent =
-    fmt(pedido.total + delivery) + (coordinar ? ' + envío' : '');
+  $('rEntregaLbl').textContent = modo === 'recojo' ? 'Recojo' : 'Delivery';
+  $('rDelivery').textContent = WhatsApp.textoEntrega(e).replace(
+    /^a coordinar$/,
+    'A coordinar',
+  );
+  $('rTotal').textContent = fmt(r.totalFinal) + (e.coordinar ? ' + envío' : '');
 
-  // Mensaje del cupón
-  const c = pedido.cupon;
+  // Mensaje del cupón (sin montos de ahorro)
+  const c = r.cupon;
   let msgCupon = c.mensaje;
   if (c.estado === 'vacio' && campania)
     msgCupon = `Escribe ${campania.codigo} para obtener el precio de lanzamiento.`;
@@ -186,7 +208,7 @@ function calcular() {
   $('msg').className = 'msg' + (err ? ' err' : '');
   $('btnEnviar').disabled = !ok;
 
-  return { pedido, delivery, deliveryTxt, entrega, coordinar };
+  return { resumen: r, distrito };
 }
 
 document.querySelectorAll('.stepper button').forEach((b) =>
@@ -209,58 +231,25 @@ sel.addEventListener('change', calcular);
 $('nombre').addEventListener('input', calcular);
 $('cupon').addEventListener('input', calcular);
 
-function waLink(texto) {
-  return `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(texto)}`;
-}
-
 $('btnEnviar').addEventListener('click', () => {
-  const c = calcular();
+  const { resumen, distrito } = calcular();
   if ($('btnEnviar').disabled) return;
-  const { pedido } = c;
-  const nombre = $('nombre').value.trim();
-  const nota = $('nota').value.trim();
-  const distrito = sel.value.split('|')[1];
-  const l = [];
-  l.push(`¡Hola Paltas Marujita! 🥑 Soy ${nombre} y quiero hacer un pedido:`);
-  l.push('');
-  pedido.lineas
-    .filter((x) => x.kg)
-    .forEach((x) =>
-      l.push(`• ${x.nombre}: ${fmtKg(x.kg)} — ${fmt(x.importeRegular)}`),
-    );
-  if (pedido.descuento)
-    l.push(
-      `• ${pedido.cupon.cupon.descripcion} (cupón ${pedido.cupon.codigo}): ${fmt(-pedido.descuento)}`,
-    );
-  l.push(
-    c.entrega === 'delivery'
-      ? `• Entrega: Delivery a ${distrito} (${c.deliveryTxt})`
-      : '• Entrega: Recojo gratis en Supermercado Royal (Calle San Miguel). Coordinemos fecha y hora.',
-  );
-  l.push('');
-  l.push(
-    `*Total: ${fmt(pedido.total + c.delivery)}${c.coordinar ? ' + envío a coordinar' : ''}*`,
-  );
-  l.push(
-    'Pago anticipado por Yape o Plin: por favor confírmenme el pedido y los datos para pagar.',
-  );
-  if (nota) {
-    l.push('');
-    l.push(`Comentario: ${nota}`);
-  }
-  window.open(waLink(l.join('\n')), '_blank', 'noopener');
+  const texto = WhatsApp.mensajePedido(CONFIG, resumen, {
+    nombre: $('nombre').value.trim(),
+    distrito,
+    comentario: $('nota').value.trim(),
+  });
+  window.open(WhatsApp.enlace(tienda.whatsapp, texto), '_blank', 'noopener');
 });
 
-const linkInfo = waLink(
-  '¡Hola Paltas Marujita! 🥑 Quisiera información sobre las paltas.',
+// ---------- Enlaces de contacto ----------
+const linkInfo = WhatsApp.enlace(
+  tienda.whatsapp,
+  `¡Hola ${tienda.nombre}! 🥑 Quisiera información sobre las paltas.`,
 );
 $('waFloat').href = linkInfo;
 $('waFooter').href = linkInfo;
-// 51987264842 → +51 987 264 842
-$('waFooter').textContent = CONFIG.whatsapp.replace(
-  /^(\d{2})(\d{3})(\d{3})(\d{3})$/,
-  '+$1 $2 $3 $4',
-);
+$('waFooter').textContent = WhatsApp.numeroVisible(tienda.whatsapp);
 
 // Oculta el botón flotante mientras se ve el formulario de pedido,
 // para que no tape el botón "Enviar pedido".

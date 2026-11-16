@@ -128,22 +128,23 @@
     return c || null;
   }
 
-  /** Descuento en céntimos de una línea (producto × kg) por un cupón. */
-  function descuentoLinea(producto, kg, cupon) {
-    if (!cupon || !kg || !aplicaA(cupon, producto.id)) return 0;
+  /** Descuento por kg (céntimos) de un producto con un cupón. Se redondea por
+   *  kg para que siempre se cumpla: kg × precio unitario = importe de la línea. */
+  function descuentoPorKg(producto, cupon) {
+    if (!cupon || !aplicaA(cupon, producto.id)) return 0;
     const reg = aCentimos(producto.precioRegular);
     let d = 0;
     if (cupon.tipo === 'precio_lanzamiento')
-      d = (reg - aCentimos(producto.precioLanzamiento)) * kg;
+      d = reg - aCentimos(producto.precioLanzamiento);
     else if (cupon.tipo === 'porcentaje')
-      d = Math.round((reg * kg * Number(cupon.valor)) / 100);
-    return Math.min(Math.max(0, d), reg * kg); // nunca negativo ni mayor que la línea
+      d = Math.round((reg * Number(cupon.valor)) / 100);
+    return Math.min(Math.max(0, d), reg); // nunca negativo ni mayor que el precio
   }
 
   /** Precio unitario por kg (céntimos) que ve el cliente en el catálogo. */
   function precioUnitario(producto, cupon) {
     const regular = aCentimos(producto.precioRegular);
-    const final = regular - descuentoLinea(producto, 1, cupon);
+    const final = regular - descuentoPorKg(producto, cupon);
     return {
       regular,
       final,
@@ -175,46 +176,104 @@
 
     const lineas = config.productos.map((p) => {
       const kg = limpias[p.id];
-      const importeRegular = aCentimos(p.precioRegular) * kg;
-      const descuento = descuentoLinea(p, kg, activo);
+      const precioRegular = aCentimos(p.precioRegular);
+      const precioUnit = precioRegular - descuentoPorKg(p, activo);
       return {
         id: p.id,
         nombre: p.nombre,
         unidad: p.unidad,
         kg,
-        precioRegular: aCentimos(p.precioRegular),
-        importeRegular,
-        descuento,
-        importe: importeRegular - descuento,
+        precioRegular,
+        precioUnitario: precioUnit, // precio de venta por kg (lo que ve el cliente)
+        importeRegular: precioRegular * kg,
+        descuento: (precioRegular - precioUnit) * kg,
+        importe: precioUnit * kg,
       };
     });
 
     const kg = lineas.reduce((s, l) => s + l.kg, 0);
     const subtotalRegular = lineas.reduce((s, l) => s + l.importeRegular, 0);
-    let descuento = lineas.reduce((s, l) => s + l.descuento, 0);
+    const subtotal = lineas.reduce((s, l) => s + l.importe, 0);
 
+    // Descuento a nivel de pedido (solo cupones 'monto_fijo').
+    let descuentoPedido = 0;
     if (activo && activo.tipo === 'monto_fijo') {
       const base = lineas
         .filter((l) => aplicaA(activo, l.id))
-        .reduce((s, l) => s + l.importeRegular, 0);
-      descuento = Math.min(aCentimos(activo.valor), base);
+        .reduce((s, l) => s + l.importe, 0);
+      descuentoPedido = Math.min(aCentimos(activo.valor), base);
     }
+
+    const total = subtotal - descuentoPedido;
+    const ahorro = subtotalRegular - total;
 
     if (activo) {
       cupon.mensaje =
-        descuento > 0
-          ? `¡Cupón ${cupon.codigo} aplicado! Ahorras ${formatoSoles(descuento)}.`
-          : `Cupón ${cupon.codigo} válido hasta el ${formatoFecha(activo.fin)}: se aplicará a tus paltas.`;
+        activo.tipo === 'precio_lanzamiento'
+          ? `Cupón ${cupon.codigo} aplicado: precio de lanzamiento hasta el ${formatoFecha(activo.fin)}.`
+          : `Cupón ${cupon.codigo} aplicado.`;
     }
 
     return {
       lineas,
       kg,
       subtotalRegular,
-      descuento,
-      total: subtotalRegular - descuento,
+      subtotal,
+      descuentoPedido,
+      total,
+      ahorro, // solo para la nota final del mensaje; no se muestra en el resumen
       cupon,
     };
+  }
+
+  /* ---------- Delivery ---------- */
+
+  /** Regla de delivery gratis de una zona como texto ("por más de 3 kg"). */
+  const textoGratis = (zona) =>
+    zona.gratisMasDe == null ? '' : `por más de ${zona.gratisMasDe} kg`;
+
+  /**
+   * Costo de entrega.
+   * modo: 'delivery' | 'recojo'; zonaIndice: índice en config.delivery.zonas.
+   */
+  function calcularEntrega(config, modo, zonaIndice, kg) {
+    if (modo === 'recojo')
+      return {
+        modo,
+        centimos: 0,
+        gratis: true,
+        coordinar: false,
+        minimoOk: kg >= config.recojo.minimoKg,
+        minimoKg: config.recojo.minimoKg,
+        faltanParaGratis: 0,
+        zona: null,
+      };
+    const zona = config.delivery.zonas[zonaIndice];
+    if (!zona) throw new Error(`Zona de delivery inexistente: ${zonaIndice}`);
+    const minimoKg = config.delivery.minimoKg;
+    const base = { modo, zona, minimoKg, minimoOk: kg >= minimoKg };
+    if (zona.tarifa == null)
+      return { ...base, centimos: 0, gratis: false, coordinar: true, faltanParaGratis: 0 };
+    const gratis = zona.gratisMasDe != null && kg > zona.gratisMasDe;
+    return {
+      ...base,
+      centimos: gratis ? 0 : aCentimos(zona.tarifa),
+      gratis,
+      coordinar: false,
+      faltanParaGratis:
+        !gratis && zona.gratisMasDe != null ? zona.gratisMasDe + 1 - kg : 0,
+    };
+  }
+
+  /**
+   * Resumen completo: única fuente para el resumen de la web, el total y el
+   * mensaje de WhatsApp.
+   * opciones: { cantidades, codigoCupon, ahora, modo, zonaIndice }
+   */
+  function resumenPedido(config, o) {
+    const pedido = calcularPedido(config, o.cantidades, o.codigoCupon, o.ahora);
+    const entrega = calcularEntrega(config, o.modo, o.zonaIndice, pedido.kg);
+    return { ...pedido, entrega, totalFinal: pedido.total + entrega.centimos };
   }
 
   return {
@@ -229,5 +288,8 @@
     cuponPublicoVigente,
     precioUnitario,
     calcularPedido,
+    textoGratis,
+    calcularEntrega,
+    resumenPedido,
   };
 });

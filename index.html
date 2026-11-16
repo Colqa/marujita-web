@@ -76,7 +76,8 @@
             <a href="#productos" class="btn btn-sec">Ver paltas</a>
           </div>
           <p class="nota">
-            🚚 Delivery <b>gratis en San Borja y San Luis</b> desde 3 kg · Pago
+            🚚 Delivery <b>gratis en <span data-cfg="zonaGratis"></span></b>
+            <span data-cfg="reglaGratis"></span> · Pago
             anticipado con Yape o Plin
           </p>
         </div>
@@ -123,7 +124,8 @@
             <div class="ico" aria-hidden="true">🛵</div>
             <h3>A tu puerta</h3>
             <p>
-              Delivery a tu casa o recojo gratis en el Supermercado Royal.
+              Delivery a tu casa o recojo gratis en
+              <span data-cfg="recojoLugar"></span>.
             </p>
           </div>
         </div>
@@ -328,12 +330,8 @@
               </div>
               <small id="notaRecojo" hidden
                 >Punto de recojo gratuito:
-                <a
-                  href="https://maps.app.goo.gl/fJwekLdzCbAUWTW96"
-                  target="_blank"
-                  rel="noopener"
-                  >Supermercado Royal (Calle San Miguel)</a
-                >. Coordinamos contigo la fecha y hora por WhatsApp.</small
+                <a data-cfg="recojoMapa" target="_blank" rel="noopener"></a>.
+                Coordinamos contigo el día y la hora por WhatsApp.</small
               >
             </div>
 
@@ -378,14 +376,15 @@
             <div class="linea">
               <span id="rHassLbl">Palta Hass</span><span id="rHass">S/ 0.00</span>
             </div>
+            <!-- Solo para cupones de monto fijo (hoy no hay ninguno) -->
             <div class="linea descuento" id="lineaDesc" hidden>
               <span id="rDescLbl">Descuento</span><span id="rDesc"></span>
             </div>
             <div class="linea">
-              <span>Delivery</span><span id="rDelivery">—</span>
+              <span id="rEntregaLbl">Delivery</span><span id="rDelivery">—</span>
             </div>
             <div class="linea total" aria-live="polite" aria-atomic="true">
-              <span>Total</span><span id="rTotal">S/ 0.00</span>
+              <span>TOTAL</span><span id="rTotal">S/ 0.00</span>
             </div>
             <p class="msg" id="msg" aria-live="polite">
               Agrega kilos para empezar.
@@ -481,29 +480,26 @@
           </details>
           <details>
             <summary>¿Cuál es el pedido mínimo?</summary>
-            <p id="faqMinimo">
-              Para delivery, el mínimo es 2 kg. Para recojo en el Supermercado
-              Royal puedes pedir desde 1 kg.
-            </p>
+            <p id="faqMinimo"></p>
           </details>
           <details>
             <summary>¿Dónde recojo mi pedido?</summary>
             <p>
-              El punto de recojo gratuito es el
-              <a
-                href="https://maps.app.goo.gl/fJwekLdzCbAUWTW96"
-                target="_blank"
-                rel="noopener"
-                >Supermercado Royal (Calle San Miguel)</a
-              >. Coordinamos contigo la fecha y hora de entrega por WhatsApp.
+              El punto de recojo gratuito es
+              <a data-cfg="recojoMapa" target="_blank" rel="noopener"></a>.
+              Coordinamos contigo el día y la hora de recojo por WhatsApp.
             </p>
           </details>
           <details>
-            <summary>¿Por qué el delivery es gratis en San Borja y San Luis?</summary>
+            <summary>
+              ¿Por qué el delivery es gratis en
+              <span data-cfg="zonaGratis"></span>?
+            </summary>
             <p>
               Solo por cercanía: son los distritos más próximos a nuestro punto
-              de reparto, así que desde 3 kg el envío no te cuesta nada. En los
-              demás distritos la tarifa refleja la distancia.
+              de reparto, así que con un pedido
+              <span data-cfg="reglaGratis"></span> el envío no te cuesta nada.
+              En los demás distritos la tarifa refleja la distancia.
             </p>
           </details>
           <details>
@@ -529,7 +525,7 @@
       <div class="logo">Paltas Marujita</div>
       <p>
         Paltas de una chacra familiar de Andahuaylas, Apurímac · Delivery a
-        hogares en Lima y recojo gratis en Supermercado Royal
+        hogares en Lima y recojo gratis en <span data-cfg="recojoLugar"></span>
       </p>
       <p style="margin-top: 6px">
         WhatsApp:
@@ -556,6 +552,7 @@
     <!-- Configuración (precios, cupones, zonas) y lógica de precios -->
     <script src="assets/js/config.js"></script>
     <script src="assets/js/precios.js"></script>
+    <script src="assets/js/whatsapp.js"></script>
     <script src="assets/js/app.js"></script>
   </body>
 </html>

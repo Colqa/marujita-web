@@ -308,33 +308,35 @@ section {
   object-fit: cover;
   border-radius: 14px;
 }
-.etiqueta-lanz {
-  display: inline-block;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--verde-osc);
-  background: var(--palta);
-  padding: 4px 10px;
-  border-radius: 999px;
-  margin-bottom: 6px;
-}
+/* Precio de referencia: pequeño, tachado, rojo y en cursiva */
 .prod .precio-reg {
-  font-size: 0.9rem;
-  color: #cfd8c0;
-  margin: 0;
+  font-size: 0.85rem;
+  margin: 0 0 2px;
 }
-.precio-reg s {
+s.ref {
+  font-style: italic;
+  font-weight: 500;
   color: var(--rojo-claro);
-  font-weight: 700;
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: 1.5px;
 }
+/* Precio de venta: protagonista */
 .precio-fila {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 4px 10px;
+  gap: 4px 12px;
+}
+.precio-fila .precio {
+  font-size: 2.6rem;
+  line-height: 1.05;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 .badge-desc {
   font-size: 0.8rem;
@@ -426,6 +428,9 @@ section {
   gap: 24px;
   align-items: start;
 }
+.pedido-box > * {
+  min-width: 0; /* que la grilla pueda encogerse en pantallas angostas */
+}
 .form {
   background: var(--blanco);
   border: 1px solid var(--borde);
@@ -465,8 +470,20 @@ section {
   font-size: 0.85rem;
   color: var(--gris);
 }
-.fila-kg s {
+.fila-kg .precio-sel {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--verde-osc);
+}
+.fila-kg s.ref {
   color: var(--rojo);
+  font-size: 0.8rem;
+  margin-left: 4px;
+}
+.fila-kg b,
+.fila-kg .precio-sel,
+.fila-kg s.ref {
+  white-space: nowrap;
 }
 #cupon {
   text-transform: uppercase;
@@ -581,6 +598,13 @@ textarea:focus {
   padding: 7px 0;
   border-bottom: 1px dashed rgba(255, 255, 255, 0.18);
   font-size: 0.97rem;
+}
+.linea {
+  gap: 10px;
+}
+.linea span:last-child {
+  white-space: nowrap;
+  text-align: right;
 }
 .linea.descuento span:last-child {
   color: var(--palta);
@@ -761,6 +785,27 @@ footer a {
 @media (max-width: 520px) {
   .grid4 {
     grid-template-columns: 1fr;
+  }
+  .precio-fila .precio {
+    font-size: 2.15rem;
+  }
+  .fila-kg {
+    padding: 12px;
+    gap: 8px;
+  }
+  .stepper {
+    gap: 2px;
+  }
+  .stepper button {
+    width: 36px;
+    height: 36px;
+  }
+  .stepper output {
+    min-width: 46px;
+  }
+  .form,
+  .resumen {
+    padding: 20px 16px;
   }
   .prod {
     flex-direction: column;
