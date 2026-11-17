@@ -22,6 +22,7 @@ const textosCfg = {
   zonaGratis: zonaConGratis ? zonaConGratis.distritos.join(' y ') : '',
   reglaGratis: zonaConGratis ? P.textoGratis(zonaConGratis) : '',
   recojoLugar: recojo.lugar,
+  cultivoDescripcion: CONFIG.cultivo.descripcion,
 };
 document.querySelectorAll('[data-cfg]').forEach((el) => {
   if (el.dataset.cfg === 'recojoMapa') {
@@ -31,6 +32,17 @@ document.querySelectorAll('[data-cfg]').forEach((el) => {
     el.textContent = textosCfg[el.dataset.cfg] || '';
   }
 });
+// Único lugar de la página donde aparece CONFIG.cultivo.termino.
+if (CONFIG.cultivo.termino) {
+  const frase = $('cultivoFrase');
+  const termino = document.createElement('strong');
+  termino.textContent = CONFIG.cultivo.termino;
+  frase.replaceChildren(
+    'Nuestras paltas son ',
+    termino,
+    `: ${CONFIG.cultivo.descripcion}.`,
+  );
+}
 $('faqMinimo').textContent =
   `Para delivery, el mínimo es ${delivery.minimoKg} kg. Para recojo en ${recojo.lugar} puedes pedir desde ${recojo.minimoKg} kg.`;
 $('anio').textContent = new Date().getFullYear();
@@ -260,3 +272,13 @@ if ('IntersectionObserver' in window) {
   ).observe($('pedido'));
 }
 calcular();
+
+// ---------- Testimonios (beta) ----------
+Testimonios.iniciar(CONFIG.testimonios, {
+  seccion: $('testimonios'),
+  pista: $('carPista'),
+  puntos: $('carPuntos'),
+  prev: $('carPrev'),
+  next: $('carNext'),
+  pausa: $('carPausa'),
+});
