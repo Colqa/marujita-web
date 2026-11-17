@@ -11,12 +11,13 @@ El pedido se arma en la web y se envía por **WhatsApp**; el pago es anticipado 
 marujita-web/
 ├── index.html               Estructura de la página (sin precios ni datos comerciales)
 ├── assets/
-│   ├── css/styles.css       Estilos
+│   ├── css/styles.css       Estilos (paleta y fuentes en :root)
 │   └── js/
 │       ├── config.js        ★ DATOS DEL NEGOCIO: tienda, WhatsApp, productos, precios,
 │       │                      cupones, delivery y recojo. Lo único que se edita a diario.
 │       ├── precios.js       Lógica pura: precios, cupones, delivery y totales (en céntimos)
 │       ├── whatsapp.js      Lógica pura: enlaces y mensaje del pedido
+│       ├── testimonios.js   Carrusel de testimonios (beta)
 │       └── app.js           Interfaz: muestra los datos y responde a los clics
 ├── scripts/
 │   ├── servidor.js          Servidor local de desarrollo (sin dependencias)
@@ -27,7 +28,7 @@ marujita-web/
 └── package.json             Comandos (sin dependencias que instalar)
 ```
 
-Orden de carga en `index.html`: `config.js` → `precios.js` → `whatsapp.js` → `app.js`.
+Orden de carga en `index.html`: `config.js` → `precios.js` → `whatsapp.js` → `testimonios.js` → `app.js`.
 `precios.js` y `whatsapp.js` no tocan la página, por eso se prueban en Node y son la **única fuente** de los importes que ven el catálogo, el selector, el resumen y el mensaje de WhatsApp.
 
 ## Cambiar datos del negocio (`assets/js/config.js`)
@@ -40,11 +41,28 @@ Orden de carga en `index.html`: `config.js` → `precios.js` → `whatsapp.js` �
 | Foto de un producto | `productos[].imagen` (por ejemplo `assets/images/palta-fuerte.jpg`) |
 | Cupones y vigencias | `cupones[]` |
 | Mínimo, tarifas y delivery gratis | `delivery.minimoKg`, `delivery.zonas[]` (`tarifa`, `gratisMasDe`) |
+| Término de cultivo | `cultivo.termino` (hoy "orgánicas"; `''` lo oculta) y `cultivo.descripcion` |
+| Testimonios | `testimonios.activo`, `testimonios.lista[]` (ver abajo) |
 | Punto de recojo | `recojo.lugar`, `recojo.direccion`, `recojo.mapa`, `recojo.minimoKg` |
 
 Ejemplo: para pasar la Fuerte de S/ 12 a S/ 13 se cambia `precioLanzamiento: 13.0` y nada más. El porcentaje de descuento se recalcula solo.
 
 **Delivery gratis:** `gratisMasDe: 3` significa gratis cuando el total del pedido **supera** 3 kg (desde 4 kg). Se evalúa sobre la suma de todas las variedades.
+
+**Término "orgánicas":** aparece en un solo lugar de la página (bloque "Crecen a su ritmo"). El texto principal en todo el sitio, incluidas las meta etiquetas, es "cultivadas de forma natural, sin aditivos químicos". Mientras no haya certificación orgánica, conviene evaluar cambiar el término (por ejemplo, `'naturales'`) o dejarlo vacío.
+
+### Testimonios (beta)
+
+La sección está **oculta** mientras `testimonios.activo` sea `false`. Para activarla:
+
+1. Reemplaza los ejemplos de `testimonios.lista` por comentarios **reales** de clientes, con su permiso.
+2. Borra `ejemplo: true` de cada uno. Los que lo tengan nunca se muestran.
+3. Opcional: agrega la foto en `assets/images/testimonios/` y pon su ruta en `foto`. Sin foto se muestran las iniciales.
+4. Cambia `activo: true` y corre `npm run verificar`. Falla si está activo y no hay testimonios reales.
+
+### Colores y tipografía
+
+Todos los colores están en variables CSS en `:root` de `assets/css/styles.css`. La paleta de marca está en el bloque "Paleta de marca". Si cambia `--verde-palta`, actualiza también `<meta name="theme-color">` en `index.html`. Las fuentes son Baloo 2 (títulos, 700 y 800) y Nunito Sans (texto, 400, 600 y 700), cargadas desde Google Fonts con `display=swap`.
 
 ### Cómo se presentan los precios
 

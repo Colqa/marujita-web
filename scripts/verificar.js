@@ -63,6 +63,27 @@ const r = CONFIG.recojo;
 if (!r.lugar || !r.direccion) error('recojo.lugar y recojo.direccion son obligatorios');
 if (!/^https:\/\//.test(r.mapa || '')) error('recojo.mapa debe ser un enlace https');
 
+// --- Cultivo ---
+const cu = CONFIG.cultivo || {};
+if (!cu.descripcion) error('cultivo.descripcion es obligatorio');
+if (cu.termino)
+  avisos.push(
+    `cultivo.termino = "${cu.termino}": verifica que puedas usar ese término (certificación).`,
+  );
+
+// --- Testimonios ---
+const te = CONFIG.testimonios || { activo: false, lista: [] };
+const reales = (te.lista || []).filter((t) => !t.ejemplo);
+for (const t of te.lista || []) {
+  if (!t.texto || !t.nombre) error(`testimonio sin texto o nombre: ${JSON.stringify(t)}`);
+  if (t.foto && !fs.existsSync(path.join(RAIZ, t.foto)))
+    error(`testimonio de ${t.nombre}: no existe la foto ${t.foto}`);
+}
+if (te.activo && !reales.length)
+  error('testimonios.activo es true pero no hay testimonios reales (todos tienen ejemplo: true)');
+if (te.activo && reales.length < te.lista.length)
+  avisos.push(`${te.lista.length - reales.length} testimonio(s) de ejemplo no se mostrarán`);
+
 // --- Archivos que carga index.html ---
 const html = fs.readFileSync(path.join(RAIZ, 'index.html'), 'utf8');
 for (const [, ref] of html.matchAll(/(?:src|href)="([^"#:]+)"/g)) {
