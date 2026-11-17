@@ -6,7 +6,7 @@
     <title>Paltas Marujita — De la chacra de Andahuaylas a tu mesa</title>
     <meta
       name="description"
-      content="Paltas Fuerte y Hass de una chacra familiar de Andahuaylas, cremosas tipo mantequilla. Delivery a tu casa en San Borja, San Luis y distritos cercanos. Pide por WhatsApp."
+      content="Paltas Fuerte y Hass de una chacra familiar de Andahuaylas, cultivadas de forma natural, sin aditivos químicos. Cremosas tipo mantequilla, con delivery a tu casa en San Borja, San Luis y distritos cercanos. Pide por WhatsApp."
     />
     <meta
       property="og:title"
@@ -14,7 +14,7 @@
     />
     <meta
       property="og:description"
-      content="Paltas cremosas de una chacra familiar de Andahuaylas, directo a tu casa. Pide por WhatsApp."
+      content="Paltas cremosas de una chacra familiar de Andahuaylas, cultivadas de forma natural, sin aditivos químicos. Directo a tu casa: pide por WhatsApp."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://colqa.github.io/marujita-web/" />
@@ -26,14 +26,15 @@
     <meta property="og:image:height" content="630" />
     <meta property="og:locale" content="es_PE" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="theme-color" content="#1f3f1c" />
+    <!-- theme-color no admite variables CSS: mantener igual a --verde-palta -->
+    <meta name="theme-color" content="#244b2d" />
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito+Sans:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="assets/css/styles.css" />
@@ -44,14 +45,14 @@
         <a href="#" class="logo" aria-label="Paltas Marujita inicio">
           <svg width="34" height="34" viewBox="0 0 64 64" aria-hidden="true">
             <path
+              class="svg-cascara"
               d="M32 4c-9 0-16 12-19 24-4 16 5 32 19 32s23-16 19-32C48 16 41 4 32 4z"
-              fill="#2f5d2a"
             />
             <path
+              class="svg-pulpa"
               d="M32 10c-7 0-12 10-14 19-3 13 4 25 14 25s17-12 14-25c-2-9-7-19-14-19z"
-              fill="#cfe08a"
             />
-            <circle cx="32" cy="38" r="10" fill="#7a4a2a" />
+            <circle class="svg-semilla" cx="32" cy="38" r="10" />
           </svg>
           <div>Paltas Marujita<small>DE ANDAHUAYLAS A TU MESA</small></div>
         </a>
@@ -67,9 +68,9 @@
             Paltas cremosas, <em>tipo mantequilla</em>, de la chacra a tu mesa
           </h1>
           <p class="lead">
-            Fuerte y Hass de una chacra familiar de Andahuaylas, seleccionadas
-            a mano. Te garantizamos su textura cremosa y su sabor, y te las
-            llevamos a casa.
+            Fuerte y Hass de una chacra familiar de Andahuaylas,
+            <span data-cfg="cultivoDescripcion"></span>. Seleccionadas a mano,
+            con textura cremosa y sabor garantizados, directo a tu casa.
           </p>
           <div class="ctas">
             <a href="#pedido" class="btn btn-wa">Armar mi pedido</a>
@@ -132,6 +133,27 @@
       </div>
     </section>
 
+    <section class="natural" id="natural">
+      <div class="wrap">
+        <div class="natural-caja">
+          <div class="natural-ico" aria-hidden="true">🌿</div>
+          <div>
+            <h2>Crecen a su ritmo, como debe ser</h2>
+            <p class="natural-lead" id="cultivoFrase">
+              Nuestras paltas son
+              <span data-cfg="cultivoDescripcion"></span>.
+            </p>
+            <p>
+              Por eso algunas se ven más pequeñas que las del supermercado:
+              nadie las apura ni las infla. Crecen de forma natural en la
+              chacra, y lo que importa está adentro: pulpa cremosa y sabor de
+              verdad.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="productos" id="productos">
       <div class="wrap">
         <div class="titulo">
@@ -142,14 +164,14 @@
           <article class="prod" id="prodFuerte">
             <svg viewBox="0 0 64 80" aria-hidden="true">
               <path
+                class="svg-fuerte"
                 d="M32 4C20 4 12 20 8 34 2 56 14 76 32 76s30-20 24-42C52 20 44 4 32 4z"
-                fill="#5c9a3a"
               />
               <path
+                class="svg-pulpa"
                 d="M32 12c-9 0-15 13-18 24-5 18 4 34 18 34s23-16 18-34c-3-11-9-24-18-24z"
-                fill="#e3ec9e"
               />
-              <circle cx="32" cy="48" r="11" fill="#7a4a2a" />
+              <circle class="svg-semilla" cx="32" cy="48" r="11" />
             </svg>
             <div>
               <h3>Palta Fuerte</h3>
@@ -168,14 +190,14 @@
           <article class="prod" id="prodHass">
             <svg viewBox="0 0 64 80" aria-hidden="true">
               <path
+                class="svg-hass"
                 d="M32 4C20 4 12 20 8 34 2 56 14 76 32 76s30-20 24-42C52 20 44 4 32 4z"
-                fill="#2b3a22"
               />
               <path
+                class="svg-pulpa"
                 d="M32 12c-9 0-15 13-18 24-5 18 4 34 18 34s23-16 18-34c-3-11-9-24-18-24z"
-                fill="#d9e48a"
               />
-              <circle cx="32" cy="48" r="11" fill="#7a4a2a" />
+              <circle class="svg-semilla" cx="32" cy="48" r="11" />
             </svg>
             <div>
               <h3>Palta Hass</h3>
@@ -206,8 +228,8 @@
           <p>
             Estamos comenzando y sabemos que la confianza se gana con hechos.
             Por eso, antes de pedirte que vuelvas a comprarnos, queremos que
-            pruebes nuestras paltas: seleccionadas, de buen tamaño, cremosas y
-            de textura mantequilla.
+            pruebes nuestras paltas: seleccionadas a mano, cultivadas de forma
+            natural, cremosas y de textura mantequilla.
           </p>
           <p>
             No hace falta buscar fuera del país para encontrar alimentos
@@ -394,7 +416,7 @@
                 width="20"
                 height="20"
                 viewBox="0 0 24 24"
-                fill="#fff"
+                fill="currentColor"
                 aria-hidden="true"
               >
                 <path
@@ -443,6 +465,47 @@
       </div>
     </section>
 
+    <section class="cuidado" id="cuidado">
+      <div class="wrap">
+        <div class="titulo">
+          <img
+            class="cuidado-mascota"
+            src="favicon.svg"
+            width="72"
+            height="72"
+            alt=""
+          />
+          <h2>Cómo cuidarlas</h2>
+          <p>Unos consejos para disfrutarlas en su punto</p>
+        </div>
+        <div class="grid3">
+          <div class="card">
+            <div class="ico" aria-hidden="true">🌱</div>
+            <h3>Maduran a su ritmo</h3>
+            <p>
+              La maduración es un proceso natural: cada palta tiene su tiempo y
+              no se puede predecir con fecha exacta.
+            </p>
+          </div>
+          <div class="card">
+            <div class="ico" aria-hidden="true">❄️</div>
+            <h3>En la refri duran más</h3>
+            <p>
+              Si quieres que te duren más días, guárdalas en la refrigeradora.
+            </p>
+          </div>
+          <div class="card">
+            <div class="ico" aria-hidden="true">🛍️</div>
+            <h3>¿Las quieres antes?</h3>
+            <p>
+              Déjalas en su bolsita de papel, en un lugar oscuro y fresco: así
+              maduran más rápido.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section id="faq">
       <div class="wrap">
         <div class="titulo"><h2>Preguntas frecuentes</h2></div>
@@ -450,20 +513,20 @@
           <details>
             <summary>¿Cómo conservo mis paltas?</summary>
             <p>
-              Mantenlas en un lugar fresco y seco, dentro de su bolsa de papel:
-              por eso no usamos plástico, el papel deja respirar a la palta y la
-              conserva mejor. Cuando la palta ceda un poco al presionarla
-              suavemente con la palma, ya está lista: en ese momento guárdala en
-              la refrigeradora y te durará unos días más.
+              Si quieres que duren más, guárdalas en la refrigeradora. Si las
+              quieres madurar más rápido, déjalas en su bolsa de papel en un
+              lugar oscuro y fresco. Por eso no usamos plástico: el papel deja
+              respirar a la palta. Más consejos en
+              <a href="#cuidado">Cómo cuidarlas</a>.
             </p>
           </details>
           <details>
             <summary>¿Qué garantizan de sus paltas?</summary>
             <p>
               La textura y el sabor: son paltas de buena calidad, cremosas y sin
-              hebras, de una chacra familiar de Andahuaylas. No podemos
-              asegurar el día exacto en que madurará cada palta, porque es un
-              producto natural.
+              hebras, de una chacra familiar de Andahuaylas. La maduración, en
+              cambio, es un proceso natural y no se puede predecir con fecha
+              exacta.
             </p>
           </details>
           <details>
@@ -492,8 +555,10 @@
           </details>
           <details>
             <summary>
-              ¿Por qué el delivery es gratis en
-              <span data-cfg="zonaGratis"></span>?
+              <span
+                >¿Por qué el delivery es gratis en
+                <span data-cfg="zonaGratis"></span>?</span
+              >
             </summary>
             <p>
               Solo por cercanía: son los distritos más próximos a nuestro punto
@@ -521,6 +586,56 @@
       </div>
     </section>
 
+    <!-- Testimonios (beta): oculto hasta CONFIG.testimonios.activo = true -->
+    <section
+      class="testimonios"
+      id="testimonios"
+      aria-roledescription="carrusel"
+      aria-labelledby="testimoniosTitulo"
+      hidden
+    >
+      <div class="wrap">
+        <div class="titulo">
+          <h2 id="testimoniosTitulo">Lo que dicen nuestros clientes</h2>
+        </div>
+        <div class="carrusel">
+          <div
+            class="car-pista"
+            id="carPista"
+            tabindex="0"
+            aria-label="Testimonios: desliza o usa las flechas"
+          ></div>
+        </div>
+        <div class="car-controles">
+          <button
+            type="button"
+            class="car-flecha"
+            id="carPrev"
+            aria-label="Testimonio anterior"
+          >
+            ‹
+          </button>
+          <div class="car-puntos" id="carPuntos"></div>
+          <button
+            type="button"
+            class="car-flecha"
+            id="carNext"
+            aria-label="Testimonio siguiente"
+          >
+            ›
+          </button>
+          <button
+            type="button"
+            class="car-pausa"
+            id="carPausa"
+            aria-label="Pausar el carrusel"
+          >
+            ❚❚
+          </button>
+        </div>
+      </div>
+    </section>
+
     <footer>
       <div class="logo">Paltas Marujita</div>
       <p>
@@ -542,7 +657,7 @@
       rel="noopener"
       aria-label="Escríbenos por WhatsApp"
     >
-      <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path
           d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.3-.8-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .5l-.3.5-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l2 .9c.3.1.5.2.5.3.1.2.1.7-.1 1.2z"
         />
@@ -553,6 +668,7 @@
     <script src="assets/js/config.js"></script>
     <script src="assets/js/precios.js"></script>
     <script src="assets/js/whatsapp.js"></script>
+    <script src="assets/js/testimonios.js"></script>
     <script src="assets/js/app.js"></script>
   </body>
 </html>

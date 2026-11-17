@@ -15,6 +15,17 @@
     whatsapp: '51993273537',
   },
 
+  /* ---------------- CULTIVO ----------------
+     termino: palabra que acompaña a "nuestras paltas son…". Aparece en UN solo
+              lugar de la página (bloque "Cultivadas de forma natural").
+              Todavía no tenemos certificación orgánica: si hace falta,
+              cámbialo (ej. 'naturales') o déjalo en '' para no mostrarlo.
+     descripcion: texto principal que se usa en la página. */
+  cultivo: {
+    termino: 'orgánicas',
+    descripcion: 'cultivadas de forma natural, sin aditivos químicos',
+  },
+
   // Perú no usa horario de verano: Lima es siempre UTC−05:00.
   zonaHoraria: { nombre: 'America/Lima', offset: '-05:00' },
 
@@ -105,5 +116,45 @@
     direccion: 'Calle San Miguel',
     mapa: 'https://maps.app.goo.gl/fJwekLdzCbAUWTW96',
     minimoKg: 1,
+  },
+
+  /* ---------------- TESTIMONIOS (beta) ----------------
+     Carrusel al final de la página. Queda OCULTO mientras activo sea false.
+     Para activarlo:
+       1. Reemplaza los ejemplos por comentarios REALES de clientes (con su permiso).
+       2. Borra `ejemplo: true` de cada uno (los marcados así nunca se muestran).
+       3. Cambia activo a true y corre npm run verificar.
+     Campos: texto, nombre, distrito, prefijo (ej. 'vecina de'; por defecto 'de'),
+             foto (ruta opcional, ej. 'assets/images/testimonios/consuelo.jpg';
+             sin foto se muestran las iniciales). */
+  testimonios: {
+    activo: false,
+    autoplaySegundos: 6,
+    lista: [
+      {
+        ejemplo: true,
+        texto: 'Son las paltas más deliciosas del mundo.',
+        nombre: 'Consuelo (EJEMPLO)',
+        prefijo: 'vecina de',
+        distrito: 'San Borja',
+        foto: null,
+      },
+      {
+        ejemplo: true,
+        texto: 'Texto de ejemplo: aquí irá el comentario real de un cliente.',
+        nombre: 'Cliente de ejemplo',
+        prefijo: 'vecino de',
+        distrito: 'San Luis',
+        foto: null,
+      },
+      {
+        ejemplo: true,
+        texto: 'Texto de ejemplo: reemplazar antes de activar la sección.',
+        nombre: 'Cliente de ejemplo',
+        prefijo: 'de',
+        distrito: 'Surquillo',
+        foto: null,
+      },
+    ],
   },
 });
